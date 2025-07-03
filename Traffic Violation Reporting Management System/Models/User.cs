@@ -23,6 +23,8 @@ public partial class User
 
     public bool? IsActive { get; set; }
 
+    public string Email { get; set; } = null!;
+
     public virtual ICollection<ComplaintResponse> ComplaintResponses { get; set; } = new List<ComplaintResponse>();
 
     public virtual ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
