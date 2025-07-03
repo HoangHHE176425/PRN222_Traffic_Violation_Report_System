@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System;
 using System.Collections.Generic;
 
 namespace Traffic_Violation_Reporting_Management_System.Models;
@@ -19,9 +20,14 @@ public partial class Report
 
     public DateTime? CreatedAt { get; set; }
 
+    public string? MediaPath { get; set; }
+
+    public string? MediaType { get; set; }
+    public string? Comment { get; set; }
+
     public virtual ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
 
     public virtual ICollection<Fine> Fines { get; set; } = new List<Fine>();
-
+    [ValidateNever]
     public virtual User Reporter { get; set; } = null!;
 }

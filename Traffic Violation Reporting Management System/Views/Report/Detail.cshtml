@@ -1,0 +1,51 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Models.Report
+
+@{
+    ViewData["Title"] = "Chi tiết báo cáo";
+}
+
+<h2>Chi tiết báo cáo</h2>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Người gửi</th>
+        <td>@Model.Reporter?.FullName</td>
+    </tr>
+    <tr>
+        <th>Địa điểm</th>
+        <td>@Model.Location</td>
+    </tr>
+    <tr>
+        <th>Thời gian vi phạm</th>
+        <td>@(Model.TimeOfViolation?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+    </tr>
+    <tr>
+        <th>Trạng thái</th>
+        <td>@(Model.Status == 1 ? "Đã xử lý" : "Chưa xử lý")</td>
+    </tr>
+    <tr>
+        <th>Ngày tạo</th>
+        <td>@(Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+    </tr>
+    <tr>
+        <th>Chú thích</th>
+        <td>@Model.Description</td>
+    </tr>
+    <tr>
+        <th>File đính kèm</th>
+        <td>
+            @if (Model.MediaType?.StartsWith("video") == true)
+            {
+                <video width="320" height="240" controls>
+                    <source src="@Model.MediaPath" type="@Model.MediaType" />
+                    Trình duyệt của bạn không hỗ trợ video.
+                </video>
+            }
+            else
+            {
+                <img src="@Model.MediaPath" alt="Ảnh" style="max-width: 300px;" />
+            }
+        </td>
+    </tr>
+</table>
+

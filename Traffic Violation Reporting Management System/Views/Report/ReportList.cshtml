@@ -1,0 +1,71 @@
+﻿@model List<Traffic_Violation_Reporting_Management_System.Models.Report>
+
+@{
+    ViewData["Title"] = "Danh sách báo cáo";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- Form tìm kiếm -->
+<form asp-action="ReportList" method="get" class="form-inline mb-3">
+    <input type="text" name="search" value="@Context.Request.Query["search"]" placeholder="Tìm theo địa điểm hoặc người gửi" class="form-control mr-2" />
+
+    <select name="status" class="form-control mr-2" onchange="this.form.submit()">
+        <option value="">-- Tất cả trạng thái --</option>
+        <option value="0" selected="@(Context.Request.Query["status"] == "0")">Chưa xử lý</option>
+        <option value="1" selected="@(Context.Request.Query["status"] == "1")">Đã xử lý</option>
+    </select>
+
+    <select name="sortOrder" class="form-control mr-2" onchange="this.form.submit()">
+        <option value="">-- Sắp xếp theo --</option>
+        <option value="violation_desc" selected="@(Context.Request.Query["sortOrder"] == "violation_desc")">Vi phạm gần nhất</option>
+        <option value="violation_asc" selected="@(Context.Request.Query["sortOrder"] == "violation_asc")">Vi phạm xa nhất</option>
+        <option value="created_desc" selected="@(Context.Request.Query["sortOrder"] == "created_desc")">Tạo gần nhất</option>
+        <option value="created_asc" selected="@(Context.Request.Query["sortOrder"] == "created_asc")">Tạo xa nhất</option>
+        <option value="name_asc" selected="@(Context.Request.Query["sortOrder"] == "name_asc")">Tên A → Z</option>
+        <option value="name_desc" selected="@(Context.Request.Query["sortOrder"] == "name_desc")">Tên Z → A</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>STT</th> <!-- Cột STT mới -->
+            <th>Người gửi</th>
+            <th>Địa điểm</th>
+            <th>Thời gian vi phạm</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th>Thao tác</th>
+            <th>Chi tiết</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var item = Model[i];
+            <tr>
+                <td>@(i + 1)</td> <!-- Hiển thị STT -->
+                <td>@item.Reporter?.FullName</td>
+                <td>@item.Location</td>
+                <td>@(item.TimeOfViolation.HasValue? item.TimeOfViolation.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")</td>
+                <td>@(item.Status == 1 ? "Đã xử lý" : "Chưa xử lý")</td>
+                <td>@(item.CreatedAt.HasValue? item.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")</td>
+                <td>
+                    <form asp-action="ToggleStatus" asp-controller="Report" asp-route-id="@item.ReportId" method="post" style="display:inline">
+                        <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Bạn có chắc muốn đổi trạng thái?')">Đổi trạng thái</button>
+                    </form>
+                </td>
+                <td>
+                    <a asp-action="Detail" asp-route-id="@item.ReportId" class="btn btn-sm btn-info">Xem chi tiết</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+
