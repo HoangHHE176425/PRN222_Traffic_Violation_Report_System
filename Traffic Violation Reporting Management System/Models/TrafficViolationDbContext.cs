@@ -187,6 +187,10 @@ public partial class TrafficViolationDbContext : DbContext
             entity.Property(e => e.Location)
                 .HasMaxLength(255)
                 .HasColumnName("location");
+            entity.Property(e => e.MediaPath)
+                .HasMaxLength(255)
+                .HasDefaultValue("");
+            entity.Property(e => e.MediaType).HasMaxLength(50);
             entity.Property(e => e.ReporterId).HasColumnName("reporter_id");
             entity.Property(e => e.Status)
                 .HasDefaultValue(0)
