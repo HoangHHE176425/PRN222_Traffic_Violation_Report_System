@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Truy cập bị từ chối";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+        <div class="col-lg-6 col-md-8 col-sm-10">
+            <div class="card border-0 shadow-lg access-denied-card">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-shield-exclamation access-denied-icon"></i>
+                    </div>
+                    
+                    <h2 class="card-title text-danger mb-3">Truy cập bị từ chối</h2>
+                    
+                    <p class="card-text text-muted mb-4 lead">
+                        Xin lỗi, bạn không có quyền truy cập vào trang này. 
+                        Vui lòng liên hệ quản trị viên nếu bạn cho rằng đây là lỗi.
+                    </p>
+                    
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a asp-controller="Home" asp-action="Index" class="btn auth-btn auth-btn-primary">
+                            <i class="bi bi-house-door me-2"></i>Về trang chủ
+                        </a>
+                        
+                        <button onclick="history.back()" class="btn btn-outline-secondary auth-btn auth-btn-outline">
+                            <i class="bi bi-arrow-left me-2"></i>Quay lại
+                        </button>
+                        
+                        <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger auth-btn auth-btn-outline">
+                                <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-muted">
+                        <small>
+                            <i class="bi bi-info-circle me-1"></i>
+                            Mã lỗi: 403 - Forbidden Access
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+ 
