@@ -9,7 +9,6 @@ public class AuthorizeRoleAttribute : Attribute, IAuthorizationFilter
     {
         _allowedRoles = allowedRoles;
     }
-
     public void OnAuthorization(AuthorizationFilterContext context)
     {
         var session = context.HttpContext.Session;
