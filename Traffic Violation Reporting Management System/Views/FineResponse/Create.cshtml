@@ -1,0 +1,50 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Models.FineResponse
+
+@{
+    ViewData["Title"] = "Tạo Khiếu Nại";
+}
+
+<h3>Tạo Khiếu Nại</h3>
+
+<!-- Hiển thị lỗi tổng -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <strong>Vui lòng kiểm tra lại các lỗi sau:</strong>
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<form asp-action="Create" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        <label for="Content">Nội dung khiếu nại</label>
+        <textarea asp-for="Content" class="form-control"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="media">Tệp đính kèm (ảnh hoặc video)</label>
+        <input type="file" name="media" class="form-control" />
+        @if (ViewData.ModelState["media"]?.Errors.Count > 0)
+        {
+            <span class="text-danger">@ViewData.ModelState["media"].Errors[0].ErrorMessage</span>
+        }
+    </div>
+
+    <input type="hidden" asp-for="FineId" />
+
+    <button type="submit" class="btn btn-primary">Gửi khiếu nại</button>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

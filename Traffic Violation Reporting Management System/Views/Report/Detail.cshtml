@@ -2,6 +2,26 @@
 
 @{
     ViewData["Title"] = "Chi tiết báo cáo";
+    var isOfficer = ViewBag.IsPolice != null && (bool)ViewBag.IsPolice;
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@* Hiển thị lỗi từ ModelState *@
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
 }
 
 <h2>Chi tiết báo cáo</h2>
@@ -34,18 +54,42 @@
     <tr>
         <th>File đính kèm</th>
         <td>
-            @if (Model.MediaType?.StartsWith("video") == true)
+            @if (!string.IsNullOrEmpty(Model.MediaType) && Model.MediaType.StartsWith("video"))
             {
                 <video width="320" height="240" controls>
                     <source src="@Model.MediaPath" type="@Model.MediaType" />
-                    Trình duyệt của bạn không hỗ trợ video.
+                    Trình duyệt không hỗ trợ định dạng video.
                 </video>
             }
-            else
+            else if (!string.IsNullOrEmpty(Model.MediaPath))
             {
-                <img src="@Model.MediaPath" alt="Ảnh" style="max-width: 300px;" />
+                <img src="@Model.MediaPath" alt="Ảnh vi phạm" style="max-width: 300px;" />
             }
+
         </td>
     </tr>
 </table>
 
+@if (Model.Status == 1)
+{
+    <div class="mt-3">
+        <h5>Phản hồi từ cảnh sát:</h5>
+        <div class="border rounded p-3 bg-light">
+            @Model.Comment
+        </div>
+    </div>
+}
+else if (isOfficer)
+{
+    <div class="mt-4">
+        <h5>Phản hồi báo cáo</h5>
+        <form method="post" asp-action="Reply" asp-route-id="@Model.ReportId">
+            @Html.AntiForgeryToken()
+            <div class="form-group mb-3">
+                <label for="comment">Nội dung phản hồi:</label>
+                <textarea name="comment" class="form-control" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Gửi phản hồi</button>
+        </form>
+    </div>
+}

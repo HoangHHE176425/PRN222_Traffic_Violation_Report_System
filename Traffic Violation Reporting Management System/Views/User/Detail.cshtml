@@ -1,0 +1,88 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Models.User
+
+@{
+    ViewData["Title"] = "Chi tiết người dùng";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    var customErrors = ViewData.ModelState.Values
+        .SelectMany(v => v.Errors)
+        .Where(e => !string.IsNullOrWhiteSpace(e.ErrorMessage) && !e.ErrorMessage.StartsWith("The "));
+
+    if (customErrors.Any())
+    {
+        <div class="alert alert-danger">
+            <strong>❗ Có lỗi xảy ra:</strong>
+            <ul class="mb-0">
+                @foreach (var error in customErrors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+}
+
+<h3>Chi tiết người dùng</h3>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="UserId" />
+    <input type="hidden" asp-for="Cccd" /> <!-- Gửi lại giá trị CCCD -->
+
+    <table class="table table-bordered">
+        <tr>
+            <th>Họ tên</th>
+            <td><input asp-for="FullName" class="form-control" /></td>
+        </tr>
+        <tr>
+            <th>CCCD</th>
+            <td><input value="@Model.Cccd" class="form-control" readonly /></td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td><input asp-for="Email" class="form-control" /></td>
+        </tr>
+        <tr>
+            <th>SĐT</th>
+            <td><input asp-for="PhoneNumber" class="form-control" /></td>
+        </tr>
+        <tr>
+            <th>Địa chỉ</th>
+            <td><input asp-for="Address" class="form-control" /></td>
+        </tr>
+        <tr>
+            <th>Vai trò</th>
+            <td>
+                <select asp-for="Role" class="form-select">
+                    <option value="0">Người dùng</option>
+                    <option value="1">Cảnh sát giao thông</option>
+                    <option value="2">Quản trị viên</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th>Ngày tạo</th>
+            <td>@Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+        </tr>
+        <tr>
+            <th>Trạng thái</th>
+            <td>
+                <select asp-for="IsActive" class="form-select">
+                    <option value="true">Hoạt động</option>
+                    <option value="false">Bị khóa</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+    <a asp-action="UserList" class="btn btn-secondary">Quay lại</a>
+</form>

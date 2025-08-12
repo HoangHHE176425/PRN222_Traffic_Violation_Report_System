@@ -1,0 +1,227 @@
+﻿@model Traffic_Violation_Reporting_Management_System.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+<style>
+    canvas {
+        max-height: 280px !important;
+        max-width: 100% !important;
+    }
+
+    #fineBehaviorChart {
+        height: 400px !important;
+    }
+</style>
+
+<h2 class="text-center my-4">Thống kê hệ thống</h2>
+
+<div class="row text-center">
+    @foreach (var card in Model.StatisticCards)
+    {
+        <div class="col-md-3 mb-4">
+            <div class="card border-@card.Color shadow-sm">
+                <div class="card-body">
+                    <i class="bi @card.Icon fs-2 text-@card.Color"></i>
+                    <h5 class="card-title mt-2">@card.Title</h5>
+                    <p class="card-text fs-4 fw-bold">@card.Value</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="p-2 border rounded bg-white">
+            <canvas id="fineBehaviorChart"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="p-2 border rounded bg-white">
+            <canvas id="fineStatusChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="p-2 border rounded bg-white">
+            <canvas id="reportStatusChart"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="p-2 border rounded bg-white">
+            <canvas id="fineResponseStatusChart"></canvas>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        Chart.register(ChartDataLabels);
+
+        const behaviorLabels = @Html.Raw(Json.Serialize(Model.FinesByBehavior.Select(b => b.Behavior)));
+        const behaviorCounts = @Html.Raw(Json.Serialize(Model.FinesByBehavior.Select(b => b.Count)));
+
+                new Chart(document.getElementById('fineBehaviorChart'), {
+            type: 'bar',
+            data: {
+                labels: behaviorLabels,
+                datasets: [{
+                    label: 'Số lỗi theo hành vi',
+                    data: behaviorCounts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    maxBarThickness: 30
+                }]
+            },
+            options: {
+                responsive: true,
+                indexAxis: 'y',
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 10,
+                        top: 10,
+                        bottom: 10
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            font: {
+                                size: 11 // giảm size chữ nếu tên quá dài
+                            },
+                            autoSkip: false
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        enabled: true
+                    }
+                }
+            }
+        });
+
+
+        function mapFineStatusLabels(keys) {
+            return keys.map(k => {
+                switch (k) {
+                    case "0": return "Chưa thanh toán";
+                    case "1": return "Đã thanh toán";
+                    case "2": return "Đã hủy";
+                    default: return k;
+                }
+            });
+        }
+
+        function mapReportStatusLabels(keys) {
+            return keys.map(k => {
+                switch (k) {
+                    case "0": return "Chưa xử lý";
+                    case "1": return "Đã xử lý";
+                    default: return k;
+                }
+            });
+        }
+
+        function mapFineResponseStatusLabels(keys) {
+            return keys.map(k => {
+                switch (k) {
+                    case "0": return "Chưa xử lý";
+                    case "1": return "Đã xử lý";
+                    default: return k;
+                }
+            });
+        }
+
+        const fineStatusLabels = mapFineStatusLabels(@Html.Raw(Json.Serialize(Model.FineStatusChart.Keys)));
+        const fineStatusData = @Html.Raw(Json.Serialize(Model.FineStatusChart.Values));
+
+        new Chart(document.getElementById('fineStatusChart'), {
+            type: 'pie',
+            data: {
+                labels: fineStatusLabels,
+                datasets: [{
+                    label: 'Số lượng vé phạt',
+                    data: fineStatusData,
+                    backgroundColor: ['#007bff', '#28a745', '#dc3545']
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    datalabels: {
+                        formatter: (value, ctx) => {
+                            let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            return (value * 100 / sum).toFixed(1) + "%";
+                        },
+                        color: '#fff',
+                    }
+                }
+            }
+        });
+
+        const reportStatusLabels = mapReportStatusLabels(@Html.Raw(Json.Serialize(Model.ReportStatusChart.Keys)));
+        const reportStatusData = @Html.Raw(Json.Serialize(Model.ReportStatusChart.Values));
+
+        new Chart(document.getElementById('reportStatusChart'), {
+            type: 'pie',
+            data: {
+                labels: reportStatusLabels,
+                datasets: [{
+                    label: 'Số lượng đơn tố cáo',
+                    data: reportStatusData,
+                    backgroundColor: ['#17a2b8', '#6610f2']
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    datalabels: {
+                        formatter: (value, ctx) => {
+                            let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            return (value * 100 / sum).toFixed(1) + "%";
+                        },
+                        color: '#fff',
+                    }
+                }
+            }
+        });
+
+        const fineResponseLabels = mapFineResponseStatusLabels(@Html.Raw(Json.Serialize(Model.FineResponseStatusChart.Keys)));
+        const fineResponseData = @Html.Raw(Json.Serialize(Model.FineResponseStatusChart.Values));
+
+        new Chart(document.getElementById('fineResponseStatusChart'), {
+            type: 'pie',
+            data: {
+                labels: fineResponseLabels,
+                datasets: [{
+                    label: 'Số lượng phản hồi về vé phạt',
+                    data: fineResponseData,
+                    backgroundColor: ['#20c997', '#e83e8c']
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    datalabels: {
+                        formatter: (value, ctx) => {
+                            let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            return (value * 100 / sum).toFixed(1) + "%";
+                        },
+                        color: '#fff',
+                    }
+                }
+            }
+        });
+    </script>
+}

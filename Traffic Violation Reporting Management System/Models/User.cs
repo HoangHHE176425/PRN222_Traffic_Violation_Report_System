@@ -21,17 +21,15 @@ public partial class User
 
     public DateTime? CreatedAt { get; set; }
 
-    public bool? IsActive { get; set; }
+    public bool IsActive { get; set; }
 
     public string Email { get; set; } = null!;
 
-    public virtual ICollection<ComplaintResponse> ComplaintResponses { get; set; } = new List<ComplaintResponse>();
-
-    public virtual ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
-
-    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+    public virtual ICollection<FineResponse> FineResponses { get; set; } = new List<FineResponse>();
 
     public virtual ICollection<Otp> Otps { get; set; } = new List<Otp>();
 
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
+
+    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

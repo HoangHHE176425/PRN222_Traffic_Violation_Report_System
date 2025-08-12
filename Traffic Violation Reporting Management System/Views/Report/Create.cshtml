@@ -3,18 +3,12 @@
 @{
     ViewData["Title"] = "Tạo báo cáo";
 }
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["SuccessMessage"]
-    </div>
-}
 
 @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger">
-        <strong>Vui lòng kiểm tra lại các trường thông tin:</strong>
-        <ul>
+        <strong>❗ Có lỗi xảy ra:</strong>
+        <ul class="mb-0">
             @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
             {
                 <li>@error.ErrorMessage</li>
@@ -22,6 +16,7 @@
         </ul>
     </div>
 }
+
 <h2>@ViewData["Title"]</h2>
 
 <form asp-action="Create" enctype="multipart/form-data" method="post">

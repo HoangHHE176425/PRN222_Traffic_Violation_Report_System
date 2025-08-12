@@ -1,0 +1,144 @@
+﻿@model List<Vehicle>  
+
+@{  
+    ViewData["Title"] = "Danh sách phương tiện";  
+    var selectedBrand = ViewBag.SelectedBrand as string;  
+    var selectedModel = ViewBag.SelectedModel as string;  
+    var selectedColor = ViewBag.SelectedColor as string;  
+    var selectedStatus = ViewBag.SelectedStatus as string;  
+    var selectedSort = ViewBag.SelectedSortOrder as string;  
+    var searchValue = ViewBag.Search as string;  
+}  
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Danh sách phương tiện</h2>
+    <a asp-action="Create" class="btn btn-success">+ Thêm phương tiện mới</a>
+</div>
+
+
+<form method="get" asp-action="VehicleList" class="row row-cols-1 row-cols-md-6 g-2 mb-3">  
+    <div>  
+        <input type="text" name="search" value="@searchValue" placeholder="Tìm kiếm..." class="form-control" />  
+    </div>  
+
+    <div>  
+        <select name="brandFilter" class="form-select" onchange="this.form.submit()">  
+            <option value="">-- Hãng xe --</option>  
+            @foreach (var brand in ViewBag.Brands as List<string>)  
+            {  
+                <option value="@brand" selected="@(brand == selectedBrand)">@brand</option>  
+            }  
+        </select>  
+    </div>  
+
+    <div>  
+        <select name="modelFilter" class="form-select" onchange="this.form.submit()">  
+            <option value="">-- Dòng xe --</option>  
+            @foreach (var vehicleModel in ViewBag.Models as List<string>)  
+            {  
+                <option value="@vehicleModel" selected="@(vehicleModel == selectedModel)">@vehicleModel</option>  
+            }  
+        </select>  
+    </div>  
+
+    <div>  
+        <select name="colorFilter" class="form-select" onchange="this.form.submit()">  
+            <option value="">-- Màu xe --</option>  
+            @foreach (var color in ViewBag.Colors as List<string>)  
+            {  
+                <option value="@color" selected="@(color == selectedColor)">@color</option>  
+            }  
+        </select>  
+    </div>  
+
+    <div>  
+        <select name="statusFilter" class="form-select" onchange="this.form.submit()">  
+            <option value="">-- Trạng thái --</option>  
+            <option value="0" selected="@(selectedStatus == "0")">Đang hoạt động</option>  
+            <option value="1" selected="@(selectedStatus == "1")">Đã bán / chuyển nhượng</option>  
+            <option value="2" selected="@(selectedStatus == "2")">Đã thu hồi</option>  
+        </select>  
+    </div>  
+
+    <div>  
+        <select name="sortOrder" class="form-select" onchange="this.form.submit()">  
+            <option value="">Sắp xếp mặc định</option>  
+            <option value="date_asc" selected="@(selectedSort == "date_asc")">Ngày ĐK ↑</option>  
+            <option value="date_desc" selected="@(selectedSort == "date_desc")">Ngày ĐK ↓</option>  
+        </select>  
+    </div>
+    <div>
+        <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+    </div>
+</form>  
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>STT</th>
+            <th>Biển số</th>
+            <th>Chủ xe</th>
+            <th>Hãng</th>
+            <th>Dòng</th>
+            <th>Màu</th>
+            <th>Ngày ĐK</th>
+            <th>Trạng thái</th>
+            <th>Chi tiết</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var item = Model[i];
+            var statusText = item.Status switch
+            {
+                0 => "Đang hoạt động",
+                1 => "Đã bán / chuyển nhượng",
+                2 => "Đã thu hồi",
+                _ => "Không xác định"
+            };
+
+            <tr>
+                <td>@(i + 1)</td> <!-- STT -->
+                <td>@item.VehicleNumber</td>
+                <td>@item.OwnerName</td>
+                <td>@item.Brand</td>
+                <td>@item.Model</td>
+                <td>@item.Color</td>
+                <td>@(item.RegistrationDate?.ToString("dd/MM/yyyy ") ?? "N/A")</td>
+                <td>
+                    <form asp-action="ChangeStatus" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@item.VehicleId" />
+                        <select name="newStatus" class="form-select form-select-sm d-inline w-auto"
+                                onchange="confirmAndSubmit(this)">
+                            <option value="0" selected="@(item.Status == 0)">Đang hoạt động</option>
+                            <option value="1" selected="@(item.Status == 1)">Đã bán / chuyển nhượng</option>
+                            <option value="2" selected="@(item.Status == 2)">Đã thu hồi</option>
+                        </select>
+                    </form>
+                </td>
+                <td>
+                    <a class="btn btn-info btn-sm" asp-action="Detail" asp-route-id="@item.VehicleId">Chi tiết</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+<script>
+    function confirmAndSubmit(selectElement) {
+        const form = selectElement.closest("form");
+        const selectedText = selectElement.options[selectElement.selectedIndex].text;
+
+        if (confirm(`Bạn có chắc chắn muốn chuyển trạng thái sang "${selectedText}" không?`)) {
+            form.submit();
+        } else {
+            // Trả lại lựa chọn cũ nếu người dùng bấm Hủy
+            const originalValue = selectElement.querySelector("option[selected]").value;
+            selectElement.value = originalValue;
+        }
+    }
+</script>
+

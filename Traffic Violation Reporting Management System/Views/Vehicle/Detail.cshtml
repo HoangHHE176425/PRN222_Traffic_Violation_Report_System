@@ -1,0 +1,103 @@
+﻿@model Vehicle
+
+@{
+    ViewData["Title"] = "Chi tiết phương tiện";
+}
+
+<h3>Chi tiết & Cập nhật phương tiện</h3>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<form asp-action="EditDetail" method="post">
+    <input type="hidden" asp-for="VehicleId" />
+
+    <div class="row mb-2">
+        <div class="col-md-6">
+            <label>Biển số</label>
+            <input asp-for="VehicleNumber" class="form-control" readonly/>
+            <span asp-validation-for="VehicleNumber" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label>Chủ xe</label>
+            <input asp-for="OwnerName" class="form-control" />
+            <span asp-validation-for="OwnerName" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-2">
+        <label>Số CCCD</label>
+        <input asp-for="OwnerCccd" class="form-control" />
+        <span asp-validation-for="OwnerCccd" class="text-danger"></span>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-md-6">
+            <label>Số điện thoại</label>
+            <input asp-for="OwnerPhoneNumber" class="form-control" />
+            <span asp-validation-for="OwnerPhoneNumber" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label>Địa chỉ</label>
+            <input asp-for="Address" class="form-control" />
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-md-6">
+            <label>Số khung</label>
+            <input asp-for="ChassicNo" class="form-control" />
+            <span asp-validation-for="ChassicNo" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label>Số máy</label>
+            <input asp-for="EngineNo" class="form-control" />
+            <span asp-validation-for="EngineNo" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-md-4">
+            <label>Hãng xe</label>
+            <input asp-for="Brand" class="form-control" />
+            <span asp-validation-for="Brand" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label>Dòng xe</label>
+            <input asp-for="Model" class="form-control" />
+            <span asp-validation-for="Model" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label>Màu</label>
+            <input asp-for="Color" class="form-control" />
+            <span asp-validation-for="Color" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-md-6">
+            <label>Ngày đăng ký</label>
+            <input asp-for="RegistrationDate" class="form-control" type="date" />
+            <span asp-validation-for="RegistrationDate" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label>Trạng thái</label>
+            <select asp-for="Status" class="form-select">
+                <option value="0">Đang hoạt động</option>
+                <option value="1">Đã bán / chuyển nhượng</option>
+                <option value="2">Đã thu hồi</option>
+            </select>
+            <span asp-validation-for="Status" class="text-danger"></span>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+    <a asp-action="VehicleList" class="btn btn-secondary">Quay lại danh sách</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,69 @@
+﻿@model List<Traffic_Violation_Reporting_Management_System.Models.FineResponse>
+@using Microsoft.AspNetCore.Http
+@{
+    ViewBag.Title = "Danh sách khiếu nại";
+    int stt = 1;
+    var request = Context.Request; // Use HttpContext to access the Request object
+}
+
+<h2>Danh sách Khiếu Nại</h2>
+
+<form id="filterForm" method="get" asp-action="FineResponseList" class="row g-2 mb-3">
+    <div class="col">
+        <input type="text" name="search" class="form-control" placeholder="Tìm theo tên hoặc người lập phạt" value="@request.Query["search"]" />
+    </div>
+    <div class="col">
+        <select id="statusSelect" name="status" class="form-select">
+            <option value="">Tất cả trạng thái</option>
+            <option value="0" selected="@(request.Query["status"] == "0")">Chờ xử lý</option>
+            <option value="1" selected="@(request.Query["status"] == "1")">Đã xử lý</option>
+        </select>
+    </div>
+    <div class="col">
+        <button class="btn btn-primary">Tìm kiếm</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>STT</th>
+            <th>Người gửi</th>
+            <th>Nội dung</th>
+            <th>Thời gian tạo</th>
+            <th>Trạng thái</th>
+            <th>Phản hồi</th>
+            <th>Ngày cập nhật</th>
+            <th>Xem chi tiết</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@stt</td>
+                <td>@item.User.FullName</td>
+                <td>@item.Content</td>
+                <td>@item.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@(item.Status == 0 ? "Chờ xử lý" : "Đã xử lý")</td>
+                <td>@(item.Reply ?? "")</td>
+                <td>@(item.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "")</td>
+                <td>
+                    <a asp-action="Detail" asp-route-id="@item.ResponseId">Chi tiết</a>
+                </td>
+            </tr>
+            stt++;
+        }
+    </tbody>
+</table>
+
+<script>
+    document.getElementById('statusSelect').addEventListener('change', function () {
+        const form = document.getElementById('filterForm');
+        if (this.value === "") {
+            // Xóa field status trước khi submit để quay lại "Tất cả"
+            this.name = "";
+        }
+        form.submit();
+    });
+</script>

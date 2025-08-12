@@ -7,9 +7,7 @@ public partial class Fine
 {
     public int FineId { get; set; }
 
-    public int ReportId { get; set; }
-
-    public decimal? Amount { get; set; }
+    public int? Amount { get; set; }
 
     public int? Status { get; set; }
 
@@ -19,7 +17,13 @@ public partial class Fine
 
     public DateTime? PaidAt { get; set; }
 
-    public virtual Vehicle IssuedByNavigation { get; set; } = null!;
+    public int? ReportId { get; set; }
 
-    public virtual Report Report { get; set; } = null!;
+    public virtual ICollection<FineResponse> FineResponses { get; set; } = new List<FineResponse>();
+
+    public virtual ICollection<FineViolationBehavior> FineViolationBehaviors { get; set; } = new List<FineViolationBehavior>();
+
+    public virtual Vehicle? IssuedByNavigation { get; set; }
+
+    public virtual Report? Report { get; set; }
 }

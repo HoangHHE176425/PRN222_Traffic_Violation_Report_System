@@ -7,7 +7,7 @@ public partial class Vehicle
 {
     public int VehicleId { get; set; }
 
-    public string OwnerCccd { get; set; } = null!;
+    public string? OwnerCccd { get; set; } 
 
     public string? OwnerName { get; set; }
 
@@ -15,7 +15,7 @@ public partial class Vehicle
 
     public string? Address { get; set; }
 
-    public string VehicleNumber { get; set; } = null!;
+    public string? VehicleNumber { get; set; } 
 
     public string? ChassicNo { get; set; }
 

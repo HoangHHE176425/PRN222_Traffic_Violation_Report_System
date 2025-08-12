@@ -17,7 +17,7 @@ public partial class Otp
 
     public bool IsUsed { get; set; }
 
-    public string Email { get; set; } = null!;
+    public string? Email { get; set; }
 
-    public virtual User EmailNavigation { get; set; } = null!;
+    public virtual User? EmailNavigation { get; set; }
 }

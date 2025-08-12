@@ -19,7 +19,11 @@ public partial class Report
 
     public DateTime? CreatedAt { get; set; }
 
-    public virtual ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
+    public string MediaPath { get; set; } = null!;
+
+    public string? MediaType { get; set; }
+
+    public string? Comment { get; set; }
 
     public virtual ICollection<Fine> Fines { get; set; } = new List<Fine>();
 

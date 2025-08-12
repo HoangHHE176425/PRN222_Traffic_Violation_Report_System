@@ -25,18 +25,100 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    @{
+                        var role = Context.Session.GetInt32("Role");
+                    }
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
                                 <i class="bi bi-house-door me-1"></i>Trang chủ
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">
-                                <i class="bi bi-shield-check me-1"></i>Chính sách
-                            </a>
-                        </li>
+
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            if (role == 0)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Report" asp-action="ReportHistory">
+                                        <i class="bi bi-clipboard-check me-1"></i>Báo cáo của tôi
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Fine" asp-action="FineHistory">
+                                        <i class="bi bi-list-check me-1"></i>Lịch sử vé phạt
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Transaction" asp-action="TransactionHistory">
+                                        <i class="bi bi-list-check me-1"></i>Lịch sử giao dịch
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="FineResponse" asp-action="FineResponseHistory">
+                                        <i class="bi bi-list-check me-1"></i>Lịch sử khiếu nại
+                                    </a>
+                                </li>
+                            }
+                            else if (role == 1)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Report" asp-action="ReportList">
+                                        <i class="bi bi-list-check me-1"></i>Danh sách báo cáo
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Vehicle" asp-action="VehicleList">
+                                        <i class="bi bi-list-check me-1"></i>Danh sách xe
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Fine" asp-action="FineList">
+                                        <i class="bi bi-list-check me-1"></i>Danh sách vé phạt
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Transaction" asp-action="TransactionList">
+                                        <i class="bi bi-list-check me-1"></i>Danh sách giao dịch
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="FineResponse" asp-action="FineResponseList">
+                                        <i class="bi bi-list-check me-1"></i>Danh sách khiếu nại
+                                    </a>
+                                </li>
+                            }
+                            else if (role == 2)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="User" asp-action="UserList">
+                                        <i class="bi bi-list-check me-1"></i>Danh sách người dùng
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Vehicle" asp-action="VehicleList">
+                                        <i class="bi bi-list-check me-1"></i>Danh sách xe
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="ViolationBehavior" asp-action="ViolationBehaviorList">
+                                        <i class="bi bi-list-check me-1"></i>Danh sách lỗi vi phạm GT
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Transaction" asp-action="TransactionList">
+                                        <i class="bi bi-list-check me-1"></i>Danh sách giao dịch
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Dashboard" asp-action="Index">
+                                        <i class="bi bi-list-check me-1"></i>Thống kê số liệu
+                                    </a>
+                                </li>
+                            }
+                        }
                     </ul>
+
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {

@@ -1,0 +1,29 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Models.Transaction
+@{
+    ViewData["Title"] = "Chi tiết giao dịch";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Mã giao dịch</th>
+        <td>@Model.TransactionId</td>
+    </tr>
+    <tr>
+        <th>Người dùng</th>
+        <td>@Model.User?.FullName (@Model.User?.Email)</td>
+    </tr>
+    <tr>
+        <th>Số tiền</th>
+        <td>@Model.Amount.ToString("N0", System.Globalization.CultureInfo.InvariantCulture) VNĐ</td>
+    </tr>
+    <tr>
+        <th>Ngày tạo</th>
+        <td>@Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+    <tr>
+        <th>Ghi chú</th>
+        <td>@Model.Description</td>
+    </tr>
+</table>

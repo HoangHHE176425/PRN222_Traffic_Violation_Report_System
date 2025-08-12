@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Traffic_Violation_Reporting_Management_System.DTOs;
@@ -91,6 +92,11 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     claimsPrincipal,
                     authProperties);
+                HttpContext.Session.SetInt32("UserId", user.UserId);
+                HttpContext.Session.SetString("FullName", user.FullName);
+                HttpContext.Session.SetInt32("Role", user.Role);
+                HttpContext.Session.SetString("Email", user.Email);
+
 
                 _logger.LogInformation("User {Email} đã đăng nhập thành công lúc {Time}", 
                     user.Email, DateTime.Now);

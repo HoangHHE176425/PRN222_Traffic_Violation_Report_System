@@ -1,0 +1,74 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Models.FineResponse
+
+@{
+    ViewBag.Title = "Chi tiết khiếu nại";
+    var report = ViewBag.Report as Traffic_Violation_Reporting_Management_System.Models.Report;
+    var isOfficer = ViewBag.IsPolice != null && (bool)ViewBag.IsPolice;
+}
+
+<h2>Chi tiết Khiếu Nại</h2>
+
+<div class="mb-3">
+    <strong>Người gửi:</strong> @Model.User?.FullName
+</div>
+
+<div class="mb-3">
+    <strong>Nội dung:</strong> @Model.Content
+</div>
+
+<div class="mb-3">
+    <strong>Ngày tạo:</strong> @Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+</div>
+
+@if (!string.IsNullOrEmpty(Model.MediaPath))
+{
+    <div class="mb-3">
+        <strong>Tệp đính kèm:</strong><br />
+        @if (Model.MediaPath.EndsWith(".mp4"))
+        {
+            <video width="400" controls>
+                <source src="@Model.MediaPath" type="video/mp4">
+            </video>
+        }
+        else
+        {
+            <img src="@Model.MediaPath" style="max-width: 400px;" />
+        }
+    </div>
+}
+@if (report != null)
+{
+    <div class="mb-3">
+        <label class="form-label">File đính kèm từ báo cáo:</label><br />
+        @if (report.MediaType?.StartsWith("video") == true)
+        {
+            <video controls style="max-width: 100%; height: auto;">
+                <source src="@report.MediaPath" type="@report.MediaType" />
+                Trình duyệt của bạn không hỗ trợ phát video.
+            </video>
+        }
+        else if (!string.IsNullOrEmpty(report.MediaPath))
+        {
+            <img src="@report.MediaPath" alt="Ảnh vi phạm" class="img-fluid rounded" style="max-height: 300px;" />
+        }
+    </div>
+}
+@if (Model.Status == 1)
+{
+    <div class="mb-3">
+        <strong>Phản hồi từ cảnh sát:</strong>
+        <div class="border p-2 rounded bg-light">@Model.Reply</div>
+    </div>
+}
+else if (isOfficer)
+{
+    <h4>Phản hồi khiếu nại</h4>
+    <form method="post" asp-action="Reply" asp-route-id="@Model.ResponseId">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label for="reply">Nội dung phản hồi</label>
+            <textarea name="replyContent" class="form-control" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-success mt-2">Gửi phản hồi</button>
+    </form>
+}

@@ -1,0 +1,50 @@
+﻿@model List<Traffic_Violation_Reporting_Management_System.Models.Transaction>
+@{
+    ViewData["Title"] = "Danh sách giao dịch";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form method="get" class="row mb-3">
+    <div class="col-md-6">
+        <input type="text" name="search" value="@Context.Request.Query["search"]" class="form-control" placeholder="Tìm theo tên người dùng" />
+    </div>
+    <div class="col-md-3">
+        <select name="sortOrder" class="form-select" onchange="this.form.submit()">
+            <option value="">Sắp xếp</option>
+            <option value="amount_asc" selected="@(ViewBag.SelectedSort == "amount_asc" ? "selected" : null)">Số tiền tăng</option>
+            <option value="amount_desc" selected="@(ViewBag.SelectedSort == "amount_desc" ? "selected" : null)">Số tiền giảm</option>
+            <option value="created_asc" selected="@(ViewBag.SelectedSort == "created_asc" ? "selected" : null)">Ngày tạo tăng</option>
+            <option value="created_desc" selected="@(ViewBag.SelectedSort == "created_desc" ? "selected" : null)">Ngày tạo giảm</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Mã GD</th>
+            <th>Người dùng</th>
+            <th>Số tiền</th>
+            <th>Ngày tạo</th>
+            <th>Chi tiết</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.TransactionId</td>
+                <td>@item.User?.FullName</td>
+                <td>@item.Amount.ToString("N0", System.Globalization.CultureInfo.InvariantCulture) VNĐ</td>
+                <td>@item.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>
+                    <a asp-action="Detail" asp-route-id="@item.TransactionId" class="btn btn-sm btn-info">Chi tiết</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

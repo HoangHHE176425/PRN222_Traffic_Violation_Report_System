@@ -1,0 +1,78 @@
+﻿@model List<Traffic_Violation_Reporting_Management_System.Models.Fine>
+
+@{
+    ViewData["Title"] = "Lịch sử phiếu phạt";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="FineHistory" method="get" class="row row-cols-1 row-cols-md-4 g-2 mb-3">
+    <div>
+        <input type="text" name="search" value="@Context.Request.Query["search"]" placeholder="Tìm theo biển số xe" class="form-control" />
+    </div>
+    <div>
+        <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="0" selected="@(Context.Request.Query["status"] == "0")">Chưa thanh toán</option>
+            <option value="1" selected="@(Context.Request.Query["status"] == "1")">Đã thanh toán</option>
+        </select>
+    </div>
+    <div>
+        <select name="sortOrder" class="form-select" onchange="this.form.submit()">
+            <option value="">-- Sắp xếp theo --</option>
+            <option value="amount_asc" selected="@(Context.Request.Query["sortOrder"] == "amount_asc")">Số tiền ↑</option>
+            <option value="amount_desc" selected="@(Context.Request.Query["sortOrder"] == "amount_desc")">Số tiền ↓</option>
+            <option value="created_desc" selected="@(Context.Request.Query["sortOrder"] == "created_desc")">Ngày tạo ↓</option>
+            <option value="created_asc" selected="@(Context.Request.Query["sortOrder"] == "created_asc")">Ngày tạo ↑</option>
+            <option value="paid_desc" selected="@(Context.Request.Query["sortOrder"] == "paid_desc")">Ngày trả ↓</option>
+            <option value="paid_asc" selected="@(Context.Request.Query["sortOrder"] == "paid_asc")">Ngày trả ↑</option>
+        </select>
+    </div>
+    <div>
+        <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>STT</th>
+            <th>Biển số xe</th>
+            <th>Số tiền</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th>Ngày cập nhật</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var fine = Model[i];
+            <tr>
+                <td>@(i + 1)</td>
+                <td>@fine.IssuedBy</td>
+                <td>@fine.Amount.GetValueOrDefault().ToString("N0", System.Globalization.CultureInfo.InvariantCulture) VNĐ</td>
+                <td>
+                    @if (fine.Status == 0)
+                    {
+                        @:Chưa thanh toán
+                    }
+                    else if (fine.Status == 1)
+                    {
+                        @:Đã thanh toán
+                    }
+                    else if (fine.Status == 2)
+                    {
+                        @:Đã hủy
+                    }
+                </td>
+                <td>@fine.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@fine.PaidAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>
+                    <a asp-action="Detail" asp-route-id="@fine.FineId" class="btn btn-sm btn-info">Chi tiết</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

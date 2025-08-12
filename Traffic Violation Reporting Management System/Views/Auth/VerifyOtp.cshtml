@@ -166,31 +166,25 @@
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
     
     <script>
+        let timeLeft = 600; // ✅ Đặt ra ngoài
+        let timerInterval;  // ✅ Cũng đặt ra ngoài để các hàm dùng chung được
+
         $(document).ready(function() {
-            let timeLeft = 600; 
-            let timerInterval;
-            
-            
             startTimer();
-            
-            
+
             $('.otp-input').on('input', function() {
-                
                 this.value = this.value.replace(/[^0-9]/g, '');
-                
-                
+
                 if (this.value.length === 1) {
                     const nextInput = $(this).next('.otp-input');
                     if (nextInput.length) {
                         nextInput.focus();
                     }
                 }
-                
-                
+
                 updateOtpCode();
             });
-            
-            
+
             $('.otp-input').on('keydown', function(e) {
                 if (e.key === 'Backspace' && this.value === '') {
                     const prevInput = $(this).prev('.otp-input');
@@ -199,24 +193,24 @@
                     }
                 }
             });
-            
+
             $('#verifyForm').on('submit', function(e) {
                 updateOtpCode();
-                
+
                 if ($('#otpCodeInput').val().length !== 6) {
                     e.preventDefault();
                     alert('Vui lòng nhập đầy đủ 6 số OTP');
                     return;
                 }
-                
+
                 const submitBtn = $('#verifyBtn');
                 const loginText = submitBtn.find('.login-text');
                 const loadingSpinner = submitBtn.find('.loading-spinner');
-                
+
                 submitBtn.prop('disabled', true);
                 loginText.hide();
                 loadingSpinner.show();
-               
+
                 setTimeout(function() {
                     if ($('.text-danger:visible, .alert-danger:visible').length > 0) {
                         submitBtn.prop('disabled', false);
@@ -225,11 +219,10 @@
                     }
                 }, 100);
             });
-            
-         
+
             $('#otp1').focus();
         });
-        
+
         function updateOtpCode() {
             let otpCode = '';
             $('.otp-input').each(function() {
@@ -237,30 +230,30 @@
             });
             $('#otpCodeInput').val(otpCode);
         }
-        
+
         function startTimer() {
             const timer = $('#timer');
             const countdown = $('#countdown');
-            
+
             timerInterval = setInterval(function() {
                 const minutes = Math.floor(timeLeft / 60);
                 const seconds = timeLeft % 60;
-                
+
                 timer.text(
                     (minutes < 10 ? '0' : '') + minutes + ':' +
                     (seconds < 10 ? '0' : '') + seconds
                 );
-                
+
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     countdown.addClass('expired');
                     timer.text('Đã hết hạn');
                 }
-                
+
                 timeLeft--;
             }, 1000);
         }
-
     </script>
+
 </body>
 </html> 

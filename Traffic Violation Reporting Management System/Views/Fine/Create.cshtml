@@ -1,0 +1,157 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Models.Fine
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Tạo phiếu phạt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var behaviors = ViewBag.ViolationBehaviors as List<SelectListItem>;
+    var report = ViewBag.Report as Traffic_Violation_Reporting_Management_System.Models.Report;
+    var reportId = ViewBag.ReportId as int?;
+    var mediaPath = ViewBag.MediaPath as string;
+    var mediaType = ViewBag.MediaType as string;
+}
+
+
+<h2>@ViewData["Title"]</h2>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<form asp-action="Create" method="post">
+    @if (reportId.HasValue)
+    {
+        <div class="alert alert-info">
+            <strong>Phiếu phạt này được tạo từ Báo cáo số: @reportId</strong>
+            <input type="hidden" name="reportId" value="@reportId" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(mediaPath))
+        {
+            if (mediaType == "image")
+            {
+                <div class="mb-3">
+                    <label class="form-label">Hình ảnh vi phạm:</label><br />
+                    <img src="@mediaPath" alt="Ảnh vi phạm" class="img-fluid rounded" style="max-height:300px;" />
+                </div>
+            }
+            else if (mediaType == "video")
+            {
+                <div class="mb-3">
+                    <label class="form-label">Video vi phạm:</label><br />
+                    <video controls style="max-width: 100%; height: auto;">
+                        <source src="@mediaPath" type="video/mp4" />
+                        Trình duyệt không hỗ trợ phát video.
+                    </video>
+                </div>
+            }
+        }
+    }
+    <div class="mb-3">
+        <label class="form-label">Biển số xe</label>
+        <input asp-for="IssuedBy" class="form-control" />
+        <span asp-validation-for="IssuedBy" class="text-danger"></span>
+    </div>
+
+    <hr />
+    <h5>Lỗi vi phạm</h5>
+
+    <div id="violation-container" class="mb-3"></div>
+
+    <div class="row mb-2 align-items-center">
+        <div class="col-md-4">
+            <select id="behaviorSelect" class="form-select" onchange="showFineRange()">
+                <option value="">-- Chọn lỗi vi phạm --</option>
+                @foreach (var item in behaviors)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <input type="number" id="fineAmountInput" class="form-control" placeholder="Nhập tiền phạt" />
+            <small class="text-muted" id="fineRangeHint"></small>
+        </div>
+        <div class="col-md-4">
+            <button type="button" class="btn btn-primary w-100" onclick="addViolation()">Thêm</button>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <strong>Tổng tiền phạt:</strong> <span id="totalAmount">0</span> VNĐ
+    </div>
+
+    <button type="submit" class="btn btn-success">Tạo phiếu phạt</button>
+    <a asp-action="FineList" class="btn btn-secondary">Hủy</a>
+</form>
+
+@section Scripts {
+    <script>
+        const behaviors = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                    ViewBag.BehaviorDetails ?? new List<object>()));
+
+    let totalAmount = 0;
+
+        function showFineRange() {
+            const selectedId = document.getElementById("behaviorSelect").value;
+            const behavior = behaviors.find(b => b.behaviorId === parseInt(selectedId));
+            const hint = document.getElementById("fineRangeHint");
+
+            if (behavior) {
+                hint.textContent = `Mức phạt: ${behavior.minFineAmount.toLocaleString()} VNĐ - ${behavior.maxFineAmount.toLocaleString()} VNĐ`;
+            } else {
+                hint.textContent = '';
+            }
+        }
+
+        function addViolation() {
+            const select = document.getElementById("behaviorSelect");
+            const selectedId = select.value;
+            const selectedName = select.options[select.selectedIndex].text;
+            const amount = parseFloat(document.getElementById("fineAmountInput").value);
+
+            if (!selectedId || isNaN(amount) || amount <= 0) {
+                alert("Vui lòng chọn lỗi và nhập số tiền hợp lệ.");
+                return;
+            }
+
+            const container = document.getElementById("violation-container");
+
+            const div = document.createElement("div");
+            div.className = "border p-2 mb-2 bg-light rounded";
+            div.innerHTML = `
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>${selectedName}</strong>: <span>${amount.toLocaleString()} VNĐ</span>
+                        <input type="hidden" name="behaviorIds" value="${selectedId}" />
+                        <input type="hidden" name="amounts" value="${amount}" />
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('div.border').remove(); updateTotal()">Xóa</button>
+                </div>
+            `;
+            container.appendChild(div);
+
+            updateTotal();
+
+            // Reset input
+            select.selectedIndex = 0;
+            document.getElementById("fineAmountInput").value = '';
+            document.getElementById("fineRangeHint").textContent = '';
+        }
+
+        function updateTotal() {
+            totalAmount = 0;
+            document.querySelectorAll("input[name='amounts']").forEach(input => {
+                totalAmount += parseFloat(input.value);
+            });
+            document.getElementById("totalAmount").textContent = totalAmount.toLocaleString();
+        }
+    </script>
+}

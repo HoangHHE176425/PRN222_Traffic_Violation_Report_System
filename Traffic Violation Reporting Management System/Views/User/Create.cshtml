@@ -1,0 +1,71 @@
+﻿@model User
+@{
+    ViewData["Title"] = "Thêm người dùng";
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    // Chỉ lấy lỗi tiếng Việt hoặc lỗi bạn chủ động thêm
+    var customErrors = ViewData.ModelState.Values
+        .SelectMany(v => v.Errors)
+        .Where(e => !string.IsNullOrWhiteSpace(e.ErrorMessage) && !e.ErrorMessage.StartsWith("The "));
+
+    if (customErrors.Any())
+    {
+        <div class="alert alert-danger">
+            <strong>❗ Có lỗi xảy ra:</strong>
+            <ul class="mb-0">
+                @foreach (var error in customErrors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+}
+
+
+<h3>Thêm người dùng</h3>
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="FullName" class="form-label">Họ và tên</label>
+        <input asp-for="FullName" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Cccd" class="form-label">CCCD</label>
+        <input asp-for="Cccd" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label">Email</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PhoneNumber" class="form-label">Số điện thoại</label>
+        <input asp-for="PhoneNumber" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Address" class="form-label">Địa chỉ</label>
+        <input asp-for="Address" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label">Mật khẩu</label>
+        <input asp-for="Password" type="password" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Role" class="form-label">Phân quyền</label>
+        <select asp-for="Role" class="form-select">
+            <option value="0">Người dùng</option>
+            <option value="1">Cảnh sát giao thông</option>
+            <option value="2">Quản trị viên</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Tạo mới</button>
+    <a asp-action="UserList" class="btn btn-secondary">Quay lại</a>
+</form>

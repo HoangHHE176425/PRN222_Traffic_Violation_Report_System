@@ -1,0 +1,105 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Models.Fine
+
+@{
+    ViewData["Title"] = "Chi tiết phiếu phạt";
+    var report = ViewBag.Report as Traffic_Violation_Reporting_Management_System.Models.Report;
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Mã phiếu phạt</th>
+        <td>@Model.FineId</td>
+    </tr>
+    <tr>
+        <th>Biển số xe</th>
+        <td>@Model.IssuedBy</td>
+    </tr>
+    <tr>
+        <th>Số tiền</th>
+        <td>@Model.Amount?.ToString("N0", System.Globalization.CultureInfo.InvariantCulture) VNĐ</td>
+    </tr>
+    <tr>
+        <th>Trạng thái</th>
+        <td>
+            @(Model.Status == 0 ? "Chưa thanh toán" :
+                        Model.Status == 1 ? "Đã thanh toán" : "Không xác định")
+        </td>
+    </tr>
+    <tr>
+        <th>Ngày tạo</th>
+        <td>@Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+    <tr>
+        <th>Ngày thanh toán</th>
+        <td>@Model.PaidAt?.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+</table>
+
+@if (report != null)
+{
+
+    <div class="mb-3">
+        <label class="form-label">File đính kèm từ báo cáo:</label><br />
+        @if (report.MediaType?.StartsWith("video") == true)
+        {
+            <video controls style="max-width: 100%; height: auto;">
+                <source src="@report.MediaPath" type="@report.MediaType" />
+                Trình duyệt của bạn không hỗ trợ phát video.
+            </video>
+        }
+        else if (!string.IsNullOrEmpty(report.MediaPath))
+        {
+            <img src="@report.MediaPath" alt="Ảnh vi phạm" class="img-fluid rounded" style="max-height: 300px;" />
+        }
+    </div>
+}
+
+
+@if (Model.FineViolationBehaviors != null && Model.FineViolationBehaviors.Any())
+{
+    <h4>Danh sách lỗi vi phạm</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Tên lỗi vi phạm</th>
+                <th>Mức phạt (VNĐ)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.FineViolationBehaviors.Count; i++)
+            {
+                var item = Model.FineViolationBehaviors.ElementAt(i);
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td>@item.Behavior.Name</td>
+                    <td>@item.DecidedAmount?.ToString("N0", System.Globalization.CultureInfo.InvariantCulture) VNĐ</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="text-muted">Không có lỗi vi phạm nào được ghi nhận cho phiếu phạt này.</p>
+}
+
+@{
+    var userRole = Context.Session.GetInt32("Role");
+}
+
+@if (Model.Status == 0 && userRole == 0)
+{
+    <div class="d-flex gap-2">
+        <form asp-controller="Payment" asp-action="PayFine" method="post">
+            <input type="hidden" name="fineId" value="@Model.FineId" />
+            <button type="submit" class="btn btn-primary">Thanh toán ngay</button>
+        </form>
+        <form asp-controller="FineResponse" asp-action="Create" method="get">
+            <input type="hidden" name="fineId" value="@Model.FineId" />
+            <button type="submit" class="btn btn-warning">Tạo đơn khiếu nại</button>
+        </form>
+    </div>
+}

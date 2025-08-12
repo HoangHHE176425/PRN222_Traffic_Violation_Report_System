@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Traffic_Violation_Reporting_Management_System;
 using Traffic_Violation_Reporting_Management_System.Models;
 using Traffic_Violation_Reporting_Management_System.Service;
 
@@ -24,11 +26,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 
-builder.Services.AddControllersWithViews(options =>
-{
-    // Configure TempData provider
-    options.EnableEndpointRouting = true;
-});
+builder.Services.AddControllersWithViews()
+    .AddNewtonsoftJson();
 
 // Configure Session for TempData
 builder.Services.AddSession(options =>
@@ -40,6 +39,14 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<SmsService>();
+builder.Services.Configure<PayOsConfig>(builder.Configuration.GetSection("PayOS"));
+builder.Services.AddHttpClient<PayOSService>();
+builder.Logging.AddConsole();
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // Gi?i h?n m?i: 100 MB
+});
 
 var app = builder.Build();
 
