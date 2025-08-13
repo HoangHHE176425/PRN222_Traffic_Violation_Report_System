@@ -42,9 +42,9 @@
             <tr>
                 <td>@(i + 1)</td> <!-- Hiển thị STT -->
                 <td>@item.Location</td>
-                <td>@(item.TimeOfViolation.HasValue? item.TimeOfViolation.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")</td>
+                <td>@(item.TimeOfViolation?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
                 <td>@(item.Status == 1 ? "Đã xử lý" : "Chưa xử lý")</td>
-                <td>@(item.CreatedAt.HasValue? item.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")</td>
+                <td>@(item.CreatedAt != null ? item.CreatedAt.ToString("dd/MM/yyyy HH:mm") : "N/A")</td> <!-- Fixed issue -->
                 <td>
                     <a asp-action="Detail" asp-route-id="@item.ReportId" class="btn btn-sm btn-info">Xem chi tiết</a>
                 </td>

@@ -7,7 +7,7 @@ public partial class ViolationBehavior
 {
     public int BehaviorId { get; set; }
 
-    public string? Name { get; set; } 
+    public string Name { get; set; } = null!;
 
     public int? MinFineAmount { get; set; }
 

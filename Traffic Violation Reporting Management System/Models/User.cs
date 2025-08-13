@@ -19,7 +19,7 @@ public partial class User
 
     public int Role { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public bool IsActive { get; set; }
 

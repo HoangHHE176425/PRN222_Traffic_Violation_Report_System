@@ -7,7 +7,7 @@ public partial class Vehicle
 {
     public int VehicleId { get; set; }
 
-    public string? OwnerCccd { get; set; } 
+    public string OwnerCccd { get; set; } = null!;
 
     public string? OwnerName { get; set; }
 
@@ -15,7 +15,7 @@ public partial class Vehicle
 
     public string? Address { get; set; }
 
-    public string? VehicleNumber { get; set; } 
+    public string VehicleNumber { get; set; } = null!;
 
     public string? ChassicNo { get; set; }
 
@@ -29,7 +29,7 @@ public partial class Vehicle
 
     public DateOnly? RegistrationDate { get; set; }
 
-    public int? Status { get; set; }
+    public int Status { get; set; }
 
     public virtual ICollection<Fine> Fines { get; set; } = new List<Fine>();
 }

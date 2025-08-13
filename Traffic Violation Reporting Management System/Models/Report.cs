@@ -17,7 +17,7 @@ public partial class Report
 
     public int? Status { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public string MediaPath { get; set; } = null!;
 

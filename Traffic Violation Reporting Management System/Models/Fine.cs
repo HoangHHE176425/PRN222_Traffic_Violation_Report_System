@@ -9,11 +9,11 @@ public partial class Fine
 
     public int? Amount { get; set; }
 
-    public int? Status { get; set; }
+    public int Status { get; set; }
 
     public string IssuedBy { get; set; } = null!;
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public DateTime? PaidAt { get; set; }
 

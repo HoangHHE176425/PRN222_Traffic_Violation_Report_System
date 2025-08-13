@@ -50,11 +50,11 @@
                 <td>@(i + 1)</td> <!-- Hiển thị STT -->
                 <td>@item.Reporter?.FullName</td>
                 <td>@item.Location</td>
-                <td>@(item.TimeOfViolation.HasValue? item.TimeOfViolation.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")</td>
+                <td>@(item.TimeOfViolation?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
                 <td>
                     @(item.Status == 0 ? "Chưa xử lý" : "Đã xử lý")
                 </td>
-                <td>@(item.CreatedAt.HasValue? item.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")</td>
+                <td>@(item.CreatedAt != null ? item.CreatedAt.ToString("dd/MM/yyyy HH:mm") : "N/A")</td> <!-- Fixed issue -->
                 <td>
                     <a asp-action="Detail" asp-route-id="@item.ReportId" class="btn btn-sm btn-info">Chi tiết</a>
                     <a asp-controller="Fine" asp-action="Create" asp-route-reportId="@item.ReportId" class="btn btn-sm btn-success ms-1">Tạo biên bản</a>
@@ -64,7 +64,3 @@
         }
     </tbody>
 </table>
-
-
-
-

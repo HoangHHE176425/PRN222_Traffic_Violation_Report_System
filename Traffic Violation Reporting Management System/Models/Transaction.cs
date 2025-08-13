@@ -11,7 +11,7 @@ public partial class Transaction
 
     public decimal Amount { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public string? Description { get; set; }
 
