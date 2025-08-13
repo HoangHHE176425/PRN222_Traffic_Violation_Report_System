@@ -80,7 +80,7 @@
                         _ => "Không xác định"
                     })
             </td>
-            <td>@user.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+            <td>@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
             <td>
                 <form asp-action="ChangeStatus" method="post">
                     <input type="hidden" name="id" value="@user.UserId" />

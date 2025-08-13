@@ -9,11 +9,11 @@ public partial class Fine
 
     public int? Amount { get; set; }
 
-    public int? Status { get; set; }
+    public int Status { get; set; }
 
     public string IssuedBy { get; set; } = null!;
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public DateTime? PaidAt { get; set; }
 
@@ -23,7 +23,7 @@ public partial class Fine
 
     public virtual ICollection<FineViolationBehavior> FineViolationBehaviors { get; set; } = new List<FineViolationBehavior>();
 
-    public virtual Vehicle? IssuedByNavigation { get; set; }
+    public virtual Vehicle IssuedByNavigation { get; set; } = null!;
 
     public virtual Report? Report { get; set; }
 }

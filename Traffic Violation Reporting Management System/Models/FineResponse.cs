@@ -15,9 +15,9 @@ public partial class FineResponse
 
     public string? MediaPath { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public int? Status { get; set; }
+    public int Status { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 

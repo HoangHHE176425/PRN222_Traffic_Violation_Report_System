@@ -17,7 +17,7 @@
 </div>
 
 <div class="mb-3">
-    <strong>Ngày tạo:</strong> @Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+    <strong>Ngày tạo:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
 </div>
 
 @if (!string.IsNullOrEmpty(Model.MediaPath))

@@ -49,7 +49,7 @@ public class DashboardController : Controller
         var fineStatus = await _context.Fines
             .GroupBy(f => f.Status)
             .ToDictionaryAsync(
-                g => g.Key.HasValue ? g.Key.Value.ToString() : "Không xác định",
+                g => g.Key.ToString() ?? string.Empty, // Fix: Ensure non-null string for dictionary key
                 g => g.Count()
             );
 
@@ -57,7 +57,7 @@ public class DashboardController : Controller
         var reportStatus = await _context.Reports
             .GroupBy(r => r.Status)
             .ToDictionaryAsync(
-                g => g.Key.HasValue ? g.Key.Value.ToString() : "Không xác định",
+                g => g.Key.ToString() ?? string.Empty, // Fix: Ensure non-null string for dictionary key
                 g => g.Count()
             );
 
@@ -65,7 +65,7 @@ public class DashboardController : Controller
         var fineResponseStatus = await _context.FineResponses
             .GroupBy(r => r.Status)
             .ToDictionaryAsync(
-                g => g.Key.HasValue ? g.Key.Value.ToString() : "Không xác định",
+                g => g.Key.ToString() ?? string.Empty, // Fix: Ensure non-null string for dictionary key
                 g => g.Count()
             );
 

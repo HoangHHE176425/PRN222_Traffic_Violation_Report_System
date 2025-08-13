@@ -74,7 +74,7 @@
                         @:Đã hủy
                     }
                 </td>
-                <td>@fine.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@fine.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>@fine.PaidAt?.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>
                     <a asp-action="Detail" asp-route-id="@fine.FineId" class="btn btn-sm btn-info">Chi tiết</a>
