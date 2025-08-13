@@ -23,7 +23,7 @@ public partial class Fine
 
     public virtual ICollection<FineViolationBehavior> FineViolationBehaviors { get; set; } = new List<FineViolationBehavior>();
 
-    public virtual Vehicle IssuedByNavigation { get; set; } = null!;
+    public virtual Vehicle? IssuedByNavigation { get; set; }
 
     public virtual Report? Report { get; set; }
 }
