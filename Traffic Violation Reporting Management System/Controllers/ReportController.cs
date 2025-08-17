@@ -1,16 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Traffic_Violation_Reporting_Management_System.Models;
+using Traffic_Violation_Reporting_Management_System.Service;
+using Traffic_Violation_Reporting_Management_System.DTOs;
+
 namespace Traffic_Violation_Reporting_Management_System.Controllers
 {
     public class ReportController : Controller
     {
         private readonly TrafficViolationDbContext _context;
 
-        public ReportController(TrafficViolationDbContext context)
+        private readonly INotificationService _notifications;
+
+        public ReportController(TrafficViolationDbContext context, INotificationService notifications)
         {
             _context = context;
+            _notifications = notifications;
         }
+
         [AuthorizeRole(1,2)]
 
         public IActionResult ReportList(string search, int? status, string sortOrder)
@@ -155,6 +162,24 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
                 _context.Reports.Add(report);
                 await _context.SaveChangesAsync();
+                // GỬI THÔNG BÁO: báo cáo mới cho tất cả Officer (Role = 1)
+                var officers = await _context.Users
+                .Where(u => u.Role == 1 && u.IsActive == true)
+                .Select(u => u.UserId)
+                .ToListAsync();
+
+                foreach (var officerId in officers)
+                {
+                    await _notifications.CreateAsync(
+                        new CreateNotificationRequest(
+                            officerId,
+                            "report.created",
+                            "Báo cáo mới",
+                            $"Có báo cáo mới #{report.ReportId} tại {report.Location}.",
+                            $"{{\"report_id\":{report.ReportId}}}"
+                        )
+                    );
+                }
 
                 TempData["SuccessMessage"] = "Báo cáo đã được gửi thành công.";
                 return RedirectToAction("Detail", new { id = report.ReportId });
@@ -186,6 +211,16 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             report.Comment = comment;
 
             await _context.SaveChangesAsync();
+            await _notifications.CreateAsync(
+                new CreateNotificationRequest(
+                    report.ReporterId,
+                    "report.replied",
+                    "Báo cáo của bạn đã được phản hồi",
+                    $"Báo cáo #{report.ReportId} đã được phản hồi.",
+                    $"{{\"report_id\":{report.ReportId}}}"
+                )
+            );
+
             TempData["SuccessMessage"] = "Phản hồi đã được gửi.";
             return RedirectToAction("Detail", new { id = report.ReportId });
         }
