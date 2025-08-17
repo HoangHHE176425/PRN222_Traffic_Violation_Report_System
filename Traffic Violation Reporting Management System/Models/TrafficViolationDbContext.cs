@@ -16,22 +16,17 @@ public partial class TrafficViolationDbContext : DbContext
     }
 
     public virtual DbSet<Fine> Fines { get; set; }
-
     public virtual DbSet<FineResponse> FineResponses { get; set; }
-
     public virtual DbSet<FineViolationBehavior> FineViolationBehaviors { get; set; }
-
     public virtual DbSet<Otp> Otps { get; set; }
-
     public virtual DbSet<Report> Reports { get; set; }
-
     public virtual DbSet<Transaction> Transactions { get; set; }
-
     public virtual DbSet<User> Users { get; set; }
-
     public virtual DbSet<Vehicle> Vehicles { get; set; }
-
     public virtual DbSet<ViolationBehavior> ViolationBehaviors { get; set; }
+
+    // --- NEW: Notifications DbSet ---
+    public virtual DbSet<Notification> Notifications { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:Default");
@@ -203,11 +198,8 @@ public partial class TrafficViolationDbContext : DbContext
             entity.HasKey(e => e.UserId).HasName("PK__Users__B9BE370F85D7E3DD");
 
             entity.HasIndex(e => e.Cccd, "UQ_Users_CCCD").IsUnique();
-
             entity.HasIndex(e => e.Email, "UQ_Users_Email").IsUnique();
-
             entity.HasIndex(e => e.Cccd, "UQ__Users__37D42BFA9E95A16E").IsUnique();
-
             entity.HasIndex(e => e.PhoneNumber, "UQ__Users__A1936A6B0324D836").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
@@ -288,6 +280,33 @@ public partial class TrafficViolationDbContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.NotificationId);
+
+            entity.ToTable("Notifications");
+
+            entity.Property(e => e.NotificationId).HasColumnName("notification_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.Type).HasMaxLength(50).HasColumnName("type");
+            entity.Property(e => e.Title).HasMaxLength(200).HasColumnName("title");
+            entity.Property(e => e.Message).HasMaxLength(500).HasColumnName("message");
+            entity.Property(e => e.DataJson).HasColumnName("data_json");
+            entity.Property(e => e.IsRead).HasColumnName("is_read").HasDefaultValue(false);
+            entity.Property(e => e.CreatedAt)
+                  .HasColumnName("created_at")
+                  .HasColumnType("datetime")
+                  .HasDefaultValueSql("(getdate())");
+
+            entity.HasIndex(e => new { e.UserId, e.IsRead, e.CreatedAt }, "IX_Notifications_User_Read_Created");
+
+            entity.HasOne<User>()
+                  .WithMany()
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Cascade)
+                  .HasConstraintName("FK_Notifications_Users");
         });
 
         OnModelCreatingPartial(modelBuilder);
