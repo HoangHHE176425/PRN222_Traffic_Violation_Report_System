@@ -1,0 +1,96 @@
+﻿@model IReadOnlyList<Traffic_Violation_Reporting_Management_System.DTOs.NotificationDto>
+@{
+    ViewData["Title"] = "Thông báo";
+    var onlyUnread = (bool)(ViewBag.OnlyUnread ?? false);
+    int page = (int)(ViewBag.Page ?? 1);
+    int pageSize = (int)(ViewBag.PageSize ?? 20);
+    int unread = (int)(ViewBag.Unread ?? 0);
+}
+
+<h2 class="mb-3">
+    <i class="bi bi-bell me-2"></i>@ViewData["Title"]
+    <span class="badge bg-danger ms-2">@unread chưa đọc</span>
+</h2>
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <form method="get" class="d-flex gap-2 align-items-center">
+        <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="pageSize" value="@@pageSize" />
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="onlyUnread" name="onlyUnread" value="true" @(onlyUnread ? "checked" : "") />
+            <label class="form-check-label" for="onlyUnread">Chỉ hiện chưa đọc</label>
+        </div>
+        <button class="btn btn-outline-primary btn-sm" type="submit">
+            <i class="bi bi-funnel"></i> Lọc
+        </button>
+    </form>
+
+    <form asp-controller="Notifications" asp-action="MarkAllRead" method="post" class="m-0">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="onlyUnread" value="@onlyUnread" />
+        <input type="hidden" name="page" value="@@page" />
+        <input type="hidden" name="pageSize" value="@@pageSize" />
+        <button class="btn btn-outline-secondary btn-sm" @(unread == 0 ? "disabled" : "")>
+            <i class="bi bi-check2-all"></i> Đánh dấu tất cả đã đọc
+        </button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="text-center text-muted p-4">
+                <i class="bi bi-inbox me-2"></i>Không có thông báo.
+            </div>
+        }
+        else
+        {
+            <ul class="list-group list-group-flush">
+                @foreach (var n in Model)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-start @(n.IsRead ? "" : "bg-light")">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">@n.Title</div>
+                            <div class="text-muted small">@n.Message</div>
+                            <div class="text-muted small">
+                                @n.CreatedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+
+                        @if (!n.IsRead)
+                        {
+                            <form asp-controller="Notifications" asp-action="MarkRead" method="post" class="m-0">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@n.NotificationId" />
+                                <input type="hidden" name="onlyUnread" value="@onlyUnread" />
+                                <input type="hidden" name="page" value="@@page" />
+                                <input type="hidden" name="pageSize" value="@pageSize" />
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-check2"></i> Đã đọc
+                                </button>
+                            </form>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center">
+        <div class="btn-group">
+            <a class="btn btn-outline-primary btn-sm @(page <= 1 ? "disabled" : "")"
+               href="@Url.Action("Index", "Notifications", new { onlyUnread, page = Math.Max(1, page-1), pageSize })">
+                <i class="bi bi-chevron-left"></i> Trước
+            </a>
+            <a class="btn btn-outline-primary btn-sm @(Model == null || Model.Count < pageSize ? "disabled" : "")"
+               href="@Url.Action("Index", "Notifications", new { onlyUnread, page = page+1, pageSize })">
+                Sau <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    @* Không có jQuery validation ở đây vì trang không có form nhập liệu có validation *@
+}
