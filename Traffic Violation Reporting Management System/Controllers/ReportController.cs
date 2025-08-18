@@ -9,7 +9,6 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
     public class ReportController : Controller
     {
         private readonly TrafficViolationDbContext _context;
-
         private readonly INotificationService _notifications;
 
         public ReportController(TrafficViolationDbContext context, INotificationService notifications)
@@ -18,8 +17,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             _notifications = notifications;
         }
 
-        [AuthorizeRole(1,2)]
-
+        [AuthorizeRole(1, 2)]
         public IActionResult ReportList(string search, int? status, string sortOrder)
         {
             var query = _context.Reports
@@ -40,7 +38,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 query = query.Where(r => r.Status == status);
             }
 
-            // Sắp xếp theo lựa chọn
+            // Sắp xếp
             switch (sortOrder)
             {
                 case "violation_asc":
@@ -67,21 +65,21 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             }
 
             var result = query.ToList();
-
             return View("ReportList", result);
         }
+
         private int? GetCurrentUserIdFromSession()
         {
             return HttpContext.Session.GetInt32("UserId");
         }
 
         [AuthorizeRole(0)]
-
         public IActionResult ReportHistory(string search, int? status)
         {
             var userId = GetCurrentUserIdFromSession();
             if (userId == null)
                 return RedirectToAction("Login", "Auth");
+
             var query = _context.Reports
                 .Include(r => r.Reporter)
                 .Where(r => r.ReporterId == userId.Value)
@@ -103,16 +101,16 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
             return View("ReportHistory", history);
         }
+
         [HttpGet]
         [AuthorizeRole(0)]
-
         public IActionResult Create()
         {
             return View();
         }
+
         [HttpPost]
         [AuthorizeRole(0)]
-
         public async Task<IActionResult> Create(Report report, IFormFile media)
         {
             var userId = GetCurrentUserIdFromSession();
@@ -160,13 +158,17 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 report.MediaPath = "/uploads/" + fileName;
                 report.MediaType = media.ContentType;
 
+                // ✅ gán trạng thái mặc định
+                report.Status = 0; // 0 = Pending/Chưa xử lý
+
                 _context.Reports.Add(report);
                 await _context.SaveChangesAsync();
-                // GỬI THÔNG BÁO: báo cáo mới cho tất cả Officer (Role = 1)
+
+                // Gửi thông báo: báo cáo mới cho Officer
                 var officers = await _context.Users
-                .Where(u => u.Role == 1 && u.IsActive == true)
-                .Select(u => u.UserId)
-                .ToListAsync();
+                    .Where(u => u.Role == 1 && u.IsActive == true)
+                    .Select(u => u.UserId)
+                    .ToListAsync();
 
                 foreach (var officerId in officers)
                 {
@@ -193,8 +195,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AuthorizeRole(1,2)]
-
+        [AuthorizeRole(1, 2)]
         public async Task<IActionResult> Reply(int id, string comment)
         {
             var report = await _context.Reports.FirstOrDefaultAsync(r => r.ReportId == id);
@@ -207,10 +208,12 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 return RedirectToAction("Detail", new { id = report.ReportId });
             }
 
-            report.Status = 1;
+            // ✅ cập nhật trạng thái khi officer phản hồi
+            report.Status = 1; // 1 = Đã phản hồi
             report.Comment = comment;
 
             await _context.SaveChangesAsync();
+
             await _notifications.CreateAsync(
                 new CreateNotificationRequest(
                     report.ReporterId,
@@ -225,10 +228,8 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             return RedirectToAction("Detail", new { id = report.ReportId });
         }
 
-
         [HttpGet]
-        [AuthorizeRole(0,1,2)]
-
+        [AuthorizeRole(0, 1, 2)]
         public async Task<IActionResult> Detail(int id)
         {
             var report = await _context.Reports
@@ -237,13 +238,9 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
             if (report == null) return NotFound();
 
-            // Kiểm tra nếu người dùng hiện tại là cảnh sát
-
             var role = HttpContext.Session.GetInt32("Role");
             ViewBag.IsPolice = (role == 1);
             return View(report);
         }
-
-
     }
 }
