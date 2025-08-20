@@ -177,7 +177,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                             officerId,
                             "report.created",
                             "Báo cáo mới",
-                            $"Có báo cáo mới #{report.ReportId} tại {report.Location}.",
+                            $"Có báo cáo mới.",
                             $"{{\"report_id\":{report.ReportId}}}"
                         )
                     );
@@ -218,8 +218,8 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 new CreateNotificationRequest(
                     report.ReporterId,
                     "report.replied",
-                    "Báo cáo của bạn đã được phản hồi",
-                    $"Báo cáo #{report.ReportId} đã được phản hồi.",
+                    "Báo cáo",
+                    $"Báo cáo đã được phản hồi.",
                     $"{{\"report_id\":{report.ReportId}}}"
                 )
             );
