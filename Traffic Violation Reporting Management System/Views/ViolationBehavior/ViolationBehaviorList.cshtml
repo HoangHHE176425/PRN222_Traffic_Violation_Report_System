@@ -1,8 +1,8 @@
-﻿@model List<Traffic_Violation_Reporting_Management_System.Models.ViolationBehavior>
+﻿@model Traffic_Violation_Reporting_Management_System.Helpers.PagedResult<Traffic_Violation_Reporting_Management_System.Models.ViolationBehavior>
 @{
     ViewData["Title"] = "Danh sách lỗi vi phạm giao thông";
+    int stt = (Model.Page - 1) * Model.PageSize + 1;
 }
-
 
 @if (TempData["SuccessMessage"] != null)
 {
@@ -14,12 +14,11 @@
     <a asp-action="Create" class="btn btn-success">+ Thêm lỗi vi phạm mới</a>
 </div>
 
-
 <form method="get" class="row row-cols-1 row-cols-md-4 g-2 mb-3">
     <div><input type="text" name="searchName" value="@ViewBag.SearchName" placeholder="Tên lỗi vi phạm" class="form-control" /></div>
     <div><input type="number" name="minFine" value="@ViewBag.MinFine" placeholder="Tiền phạt tối thiểu" class="form-control" /></div>
     <div><input type="number" name="maxFine" value="@ViewBag.MaxFine" placeholder="Tiền phạt tối đa" class="form-control" /></div>
-    <div><button type="submit" class="btn btn-primary w-100">TÌm kiếm</button></div>
+    <div><button type="submit" class="btn btn-primary w-100">Tìm kiếm</button></div>
 </form>
 
 <table class="table table-bordered table-hover">
@@ -33,11 +32,10 @@
         </tr>
     </thead>
     <tbody>
-        @for (int i = 0; i < Model.Count; i++)
+        @foreach (var item in Model.Items)
         {
-            var item = Model[i];
             <tr>
-                <td>@(i + 1)</td>
+                <td>@stt</td>
                 <td>@item.Name</td>
                 <td>@item.MinFineAmount.GetValueOrDefault().ToString("N0", System.Globalization.CultureInfo.InvariantCulture) VNĐ</td>
                 <td>@item.MaxFineAmount.GetValueOrDefault().ToString("N0", System.Globalization.CultureInfo.InvariantCulture) VNĐ</td>
@@ -45,6 +43,19 @@
                     <a asp-action="Detail" asp-route-id="@item.BehaviorId" class="btn btn-sm btn-info">Chi tiết</a>
                 </td>
             </tr>
+            stt++;
         }
     </tbody>
 </table>
+
+<!-- Phân trang -->
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(Model.Page == i ? "active" : "")">
+                <a class="page-link" href="@Url.Action("ViolationBehaviorList", new { page = i, searchName = ViewBag.SearchName, minFine = ViewBag.MinFine, maxFine = ViewBag.MaxFine })">@i</a>
+            </li>
+        }
+    </ul>
+</nav>

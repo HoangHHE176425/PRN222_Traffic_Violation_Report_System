@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Traffic_Violation_Reporting_Management_System.Helpers;
 using Traffic_Violation_Reporting_Management_System.Models;
 
 namespace Traffic_Violation_Reporting_Management_System.Controllers
@@ -106,7 +107,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
         // Cảnh sát xem danh sách tất cả khiếu nại
         [AuthorizeRole(1,2)]
 
-        public IActionResult FineResponseList(string search, int? status)
+        public IActionResult FineResponseList(string search, int? status, int page = 1, int pageSize = 10)
         {
             var query = _context.FineResponses
                 .Include(r => r.Fine)
@@ -119,25 +120,30 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             if (status.HasValue)
                 query = query.Where(r => r.Status == status);
 
-            var result = query.OrderByDescending(r => r.CreatedAt).ToList();
-            return View("FineResponseList", result); // View riêng cho cảnh sát
+            var pagedResult = query
+                .OrderByDescending(r => r.CreatedAt)
+                .GetPaged(page, pageSize);
+
+            return View("FineResponseList", pagedResult);
         }
 
         // Người dùng xem lịch sử khiếu nại của mình
         [AuthorizeRole(0)]
 
-        public IActionResult FineResponseHistory()
+        public IActionResult FineResponseHistory(int page = 1, int pageSize = 10)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null) return RedirectToAction("Login", "Auth");
+            if (userId == null)
+                return RedirectToAction("Login", "Auth");
 
-            var responses = _context.FineResponses
+            var query = _context.FineResponses
                 .Include(r => r.Fine)
                 .Where(r => r.UserId == userId)
-                .OrderByDescending(r => r.CreatedAt)
-                .ToList();
+                .OrderByDescending(r => r.CreatedAt);
 
-            return View("FineResponseHistory", responses); // View riêng cho người dùng
+            var pagedResult = query.GetPaged(page, pageSize);
+
+            return View("FineResponseHistory", pagedResult);
         }
         [AuthorizeRole(0,1,2)]
 

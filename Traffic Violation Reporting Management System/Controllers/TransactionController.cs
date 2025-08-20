@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Traffic_Violation_Reporting_Management_System.Helpers;
 using Traffic_Violation_Reporting_Management_System.Models;
 
 namespace Traffic_Violation_Reporting_Management_System.Controllers
@@ -22,7 +23,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
         // --- Danh sách tất cả giao dịch ---
         [AuthorizeRole(1,2)]
 
-        public IActionResult TransactionList(string search, string sortOrder)
+        public IActionResult TransactionList(string search, string sortOrder, int page = 1, int pageSize = 10)
         {
             var query = _context.Transactions
                 .Include(t => t.User)
@@ -52,8 +53,9 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                     break;
             }
 
-            var result = query.ToList();
-            return View("TransactionList", result);
+            var pagedResult = query.GetPaged(page, pageSize);
+
+            return View("TransactionList", pagedResult);
         }
 
         // --- Xem chi tiết 1 giao dịch ---
@@ -75,18 +77,20 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
         // --- Lịch sử giao dịch của người dùng ---
         [AuthorizeRole(0)]
 
-        public IActionResult TransactionHistory()
+        public IActionResult TransactionHistory(int page = 1, int pageSize = 10)
         {
             var userId = GetCurrentUserIdFromSession();
             if (userId == null)
                 return RedirectToAction("Login", "Auth");
 
-            var history = _context.Transactions
+            var query = _context.Transactions
                 .Where(t => t.UserId == userId.Value)
-                .OrderByDescending(t => t.CreatedAt)
-                .ToList();
+                .OrderByDescending(t => t.CreatedAt);
 
-            return View("TransactionHistory", history);
+            var pagedResult = query.GetPaged(page, pageSize);
+
+            return View("TransactionHistory", pagedResult);
         }
+
     }
 }

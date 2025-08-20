@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using Traffic_Violation_Reporting_Management_System.Helpers;
 using Traffic_Violation_Reporting_Management_System.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -17,7 +18,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             _context = context;
         }
 
-        public IActionResult ViolationBehaviorList(string searchName, decimal? minFine, decimal? maxFine)
+        public IActionResult ViolationBehaviorList(string searchName, decimal? minFine, decimal? maxFine, int page = 1, int pageSize = 10)
         {
             var query = _context.ViolationBehaviors.AsQueryable();
 
@@ -40,9 +41,13 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             ViewBag.MinFine = minFine;
             ViewBag.MaxFine = maxFine;
 
-            var result = query.OrderBy(v => v.MinFineAmount).ToList();
-            return View(result);
+            var pagedResult = query
+                .OrderBy(v => v.MinFineAmount)
+                .GetPaged(page, pageSize);
+
+            return View(pagedResult);
         }
+
 
         // GET: /ViolationBehavior/Create
         [HttpGet]

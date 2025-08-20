@@ -1,4 +1,4 @@
-﻿@model List<User>
+﻿@model Traffic_Violation_Reporting_Management_System.Helpers.PagedResult<Traffic_Violation_Reporting_Management_System.Models.User>
 @{
     ViewData["Title"] = "Danh sách người dùng";
 }
@@ -61,11 +61,11 @@
     </thead>
 
     <tbody>
-        @for (int i = 0; i < Model.Count; i++)
+        @for (int i = 0; i < Model.Items.Count; i++)
         {
-            var user = Model[i];
+            var user = Model.Items[i];
             <tr>
-                <td>@(i + 1)</td> <!-- STT -->
+                <td>@((Model.Page - 1) * Model.PageSize + i + 1)</td>
                 <td>@user.FullName</td>
                 <td>@user.Cccd</td>
                 <td>@user.Email</td>
@@ -99,7 +99,22 @@
     </tbody>
 
 </table>
-
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.Page ? "active" : "")">
+                <a class="page-link" href="@Url.Action("UserList", new {
+                    page = i,
+                    pageSize = Model.PageSize,
+                    search = ViewBag.Search,
+                    status = ViewBag.Status,
+                    sortOrder = ViewBag.SortOrder
+                })">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
 <script>
     function confirmAndSubmit(selectElement) {
         const form = selectElement.closest("form");

@@ -128,7 +128,7 @@ namespace Traffic_Violation_Reporting_Management_System.Service
                         Email = request.Email.Trim().ToLower(),
                         Address = request.Address?.Trim(),
                         Password = request.Password, 
-                        Role = 2,
+                        Role = 0,
                         IsActive = false, 
                         CreatedAt = DateTime.Now
                     };

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Traffic_Violation_Reporting_Management_System.Models;
+using Traffic_Violation_Reporting_Management_System.Helpers;
 
 namespace Traffic_Violation_Reporting_Management_System.Controllers
 {
@@ -16,7 +17,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
         }
         [AuthorizeRole(1,2)]
 
-        public IActionResult FineList(string search, int? status, string sortOrder)
+        public IActionResult FineList(string search, int? status, string sortOrder, int page = 1, int pageSize = 10)
         {
             var query = _context.Fines.AsQueryable();
 
@@ -39,12 +40,17 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 default: query = query.OrderByDescending(f => f.CreatedAt); break;
             }
 
-            var result = query.ToList();
-            return View("FineList", result);
+            var pagedResult = query.GetPaged(page, pageSize);
+
+            // Gửi dữ liệu sang View
+            ViewBag.Search = search;
+            ViewBag.Status = status;
+            ViewBag.SortOrder = sortOrder;
+
+            return View("FineList", pagedResult);
         }
         [AuthorizeRole(0)]
-
-        public IActionResult FineHistory(string search, int? status, string sortOrder)
+        public IActionResult FineHistory(string search, int? status, string sortOrder, int page = 1, int pageSize = 10)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login", "Auth");
@@ -61,12 +67,14 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 .Where(f => userVehicleNumbers.Contains(f.IssuedBy))
                 .AsQueryable();
 
+            // Bộ lọc tìm kiếm
             if (!string.IsNullOrEmpty(search))
                 query = query.Where(f => f.IssuedBy.Contains(search));
 
             if (status.HasValue)
                 query = query.Where(f => f.Status == status);
 
+            // Sắp xếp
             switch (sortOrder)
             {
                 case "amount_asc": query = query.OrderBy(f => f.Amount); break;
@@ -80,9 +88,17 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 default: query = query.OrderByDescending(f => f.CreatedAt); break;
             }
 
-            var result = query.ToList();
-            return View("FineHistory", result);
+            // Phân trang
+            var pagedResult = query.GetPaged(page, pageSize);
+
+            // Giữ giá trị filter khi đổi trang
+            ViewBag.Search = search;
+            ViewBag.Status = status;
+            ViewBag.SortOrder = sortOrder;
+
+            return View("FineHistory", pagedResult);
         }
+
         [AuthorizeRole(0,1,2)]
 
         public IActionResult Detail(int id)
