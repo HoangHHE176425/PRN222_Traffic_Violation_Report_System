@@ -161,16 +161,27 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
         public IActionResult Create(Fine fine, List<int> behaviorIds, List<decimal> amounts, int? reportId = null)
         {
             if (string.IsNullOrWhiteSpace(fine.IssuedBy))
+            {
                 ModelState.AddModelError("IssuedBy", "Vui lòng nhập biển số xe.");
+            }
             else
             {
                 // Kiểm tra xem biển số có tồn tại trong bảng Vehicle không
-                bool vehicleExists = _context.Vehicles.Any(v => v.VehicleNumber == fine.IssuedBy);
-                if (!vehicleExists)
+                var vehicle = _context.Vehicles.FirstOrDefault(v => v.VehicleNumber == fine.IssuedBy);
+                if (vehicle == null)
                 {
                     ModelState.AddModelError("IssuedBy", "Biển số xe không tồn tại trong hệ thống.");
                 }
+                else
+                {
+                    // Kiểm tra trạng thái của xe
+                    if (vehicle.Status == 1) // Giả sử 1 = Tạm giam/Thu hồi
+                    {
+                        ModelState.AddModelError("IssuedBy", "Xe này hiện đã bị tạm giam hoặc thu hồi.");
+                    }
+                }
             }
+
 
 
             if (behaviorIds.Count != amounts.Count || behaviorIds.Count == 0)

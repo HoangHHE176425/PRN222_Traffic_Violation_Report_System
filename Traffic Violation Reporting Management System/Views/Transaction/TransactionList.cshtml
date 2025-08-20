@@ -32,6 +32,7 @@
             <th>Người dùng</th>
             <th>Số tiền</th>
             <th>Ngày tạo</th>
+            <th>Mô tả</th>
             <th>Chi tiết</th>
         </tr>
     </thead>
@@ -44,6 +45,7 @@
                 <td>@item.User?.FullName</td>
                 <td>@item.Amount.ToString("N0", System.Globalization.CultureInfo.InvariantCulture) VNĐ</td>
                 <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@item.Description</td>
                 <td>
                     <a asp-action="Detail" asp-route-id="@item.TransactionId" class="btn btn-sm btn-info">Chi tiết</a>
                 </td>

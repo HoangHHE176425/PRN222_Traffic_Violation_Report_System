@@ -162,6 +162,9 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             }
             user.IsActive = newStatus;
             _context.SaveChanges();
+            var referer = Request.Headers["Referer"].ToString();
+            if (!string.IsNullOrEmpty(referer))
+                return Redirect(referer);
 
             return RedirectToAction("UserList");
         }

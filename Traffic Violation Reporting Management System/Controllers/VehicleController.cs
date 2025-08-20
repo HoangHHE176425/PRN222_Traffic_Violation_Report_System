@@ -118,6 +118,9 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
             vehicle.Status = newStatus;
             _context.SaveChanges();
+            var referer = Request.Headers["Referer"].ToString();
+            if (!string.IsNullOrEmpty(referer))
+                return Redirect(referer);
 
             return RedirectToAction("VehicleList");
         }
@@ -143,16 +146,14 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 ModelState.AddModelError("OwnerCccd", "CCCD không được để trống.");
             else if (!Regex.IsMatch(vehicle.OwnerCccd, @"^\d{12}$"))
                 ModelState.AddModelError("OwnerCccd", "CCCD phải gồm đúng 12 chữ số.");
-            else if (_context.Vehicles.Any(v => v.OwnerCccd == vehicle.OwnerCccd))
-                ModelState.AddModelError("OwnerCccd", "CCCD đã tồn tại.");
+           
 
             // SĐT
             if (string.IsNullOrWhiteSpace(vehicle.OwnerPhoneNumber))
                 ModelState.AddModelError("OwnerPhoneNumber", "Số điện thoại không được để trống.");
             else if (!Regex.IsMatch(vehicle.OwnerPhoneNumber, @"^(03|05|07|08|09)\d{8}$"))
                 ModelState.AddModelError("OwnerPhoneNumber", "SĐT phải bắt đầu bằng 03, 05, 07, 08 hoặc 09 và gồm 10 số.");
-            else if (_context.Vehicles.Any(v => v.OwnerPhoneNumber == vehicle.OwnerPhoneNumber))
-                ModelState.AddModelError("OwnerPhoneNumber", "Số điện thoại đã tồn tại.");
+           
 
             // Địa chỉ, hãng, dòng, màu xe
             if (string.IsNullOrWhiteSpace(vehicle.Address))
@@ -237,15 +238,13 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 ModelState.AddModelError("OwnerCccd", "CCCD không được để trống.");
             else if (!Regex.IsMatch(updated.OwnerCccd, @"^\d{12}$"))
                 ModelState.AddModelError("OwnerCccd", "CCCD phải gồm đúng 12 chữ số.");
-            else if (_context.Vehicles.Any(v => v.OwnerCccd == updated.OwnerCccd && v.VehicleId != updated.VehicleId))
-                ModelState.AddModelError("OwnerCccd", "CCCD đã tồn tại.");
+          
 
             if (string.IsNullOrWhiteSpace(updated.OwnerPhoneNumber))
                 ModelState.AddModelError("OwnerPhoneNumber", "Số điện thoại không được để trống.");
             else if (!Regex.IsMatch(updated.OwnerPhoneNumber, @"^(03|05|07|08|09)\d{8}$"))
                 ModelState.AddModelError("OwnerPhoneNumber", "SĐT phải bắt đầu bằng 03, 05, 07, 08 hoặc 09 và gồm 10 số.");
-            else if (_context.Vehicles.Any(v => v.OwnerPhoneNumber == updated.OwnerPhoneNumber && v.VehicleId != updated.VehicleId))
-                ModelState.AddModelError("OwnerPhoneNumber", "Số điện thoại đã tồn tại.");
+           
 
             if (string.IsNullOrWhiteSpace(updated.Address))
                 ModelState.AddModelError("Address", "Địa chỉ không được để trống.");

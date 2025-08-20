@@ -19,6 +19,7 @@ else
                 <th>Mã GD</th>
                 <th>Số tiền</th>
                 <th>Ngày tạo</th>
+                <th>Mô tả</th>
                 <th></th>
             </tr>
         </thead>
@@ -30,6 +31,7 @@ else
                     <td>@item.TransactionId</td>
                     <td>@item.Amount.ToString("N0", System.Globalization.CultureInfo.InvariantCulture) VNĐ</td>
                     <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@item.Description</td>
                     <td>
                         <a asp-action="Detail" asp-route-id="@item.TransactionId" class="btn btn-sm btn-secondary">Xem</a>
                     </td>
