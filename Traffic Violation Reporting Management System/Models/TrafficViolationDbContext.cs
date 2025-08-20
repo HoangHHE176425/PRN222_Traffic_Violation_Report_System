@@ -35,6 +35,7 @@ public partial class TrafficViolationDbContext : DbContext
     {
         modelBuilder.Entity<Fine>(entity =>
         {
+            entity.ToTable(tb => tb.UseSqlOutputClause(false));
             entity.HasKey(e => e.FineId).HasName("PK__Fines__F3C688D1F4569110");
 
             entity.Property(e => e.FineId).HasColumnName("fine_id");
