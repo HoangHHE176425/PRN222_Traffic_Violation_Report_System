@@ -2,17 +2,21 @@
 using Microsoft.EntityFrameworkCore;
 using Traffic_Violation_Reporting_Management_System.Helpers;
 using Traffic_Violation_Reporting_Management_System.Models;
+using Traffic_Violation_Reporting_Management_System.Service;
+using Traffic_Violation_Reporting_Management_System.DTOs;
+
 namespace Traffic_Violation_Reporting_Management_System.Controllers
 {
     public class ReportController : Controller
     {
         private readonly TrafficViolationDbContext _context;
+        private readonly INotificationService _notifications;
 
-        public ReportController(TrafficViolationDbContext context)
+        public ReportController(TrafficViolationDbContext context, INotificationService notifications)
         {
             _context = context;
+            _notifications = notifications;
         }
-        [AuthorizeRole(1,2)]
 
         public IActionResult ReportList(string search, int? status, string sortOrder, int page = 1, int pageSize = 10)
         {
@@ -34,7 +38,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 query = query.Where(r => r.Status == status);
             }
 
-            // Sắp xếp theo lựa chọn
+            // Sắp xếp
             switch (sortOrder)
             {
                 case "violation_asc":
@@ -69,6 +73,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
             return View("ReportList", pagedResult);
         }
+
         private int? GetCurrentUserIdFromSession()
         {
             return HttpContext.Session.GetInt32("UserId");
@@ -109,14 +114,13 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
         [HttpGet]
         [AuthorizeRole(0)]
-
         public IActionResult Create()
         {
             return View();
         }
+
         [HttpPost]
         [AuthorizeRole(0)]
-
         public async Task<IActionResult> Create(Report report, IFormFile media)
         {
             var userId = GetCurrentUserIdFromSession();
@@ -164,8 +168,30 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 report.MediaPath = "/uploads/" + fileName;
                 report.MediaType = media.ContentType;
 
+                // ✅ gán trạng thái mặc định
+                report.Status = 0; // 0 = Pending/Chưa xử lý
+
                 _context.Reports.Add(report);
                 await _context.SaveChangesAsync();
+
+                // Gửi thông báo: báo cáo mới cho Officer
+                var officers = await _context.Users
+                    .Where(u => u.Role == 1 && u.IsActive == true)
+                    .Select(u => u.UserId)
+                    .ToListAsync();
+
+                foreach (var officerId in officers)
+                {
+                    await _notifications.CreateAsync(
+                        new CreateNotificationRequest(
+                            officerId,
+                            "report.created",
+                            "Báo cáo mới",
+                            $"Có báo cáo mới.",
+                            $"{{\"report_id\":{report.ReportId}}}"
+                        )
+                    );
+                }
 
                 TempData["SuccessMessage"] = "Báo cáo đã được gửi thành công.";
                 return RedirectToAction("Detail", new { id = report.ReportId });
@@ -179,8 +205,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AuthorizeRole(1,2)]
-
+        [AuthorizeRole(1, 2)]
         public async Task<IActionResult> Reply(int id, string comment)
         {
             var report = await _context.Reports.FirstOrDefaultAsync(r => r.ReportId == id);
@@ -193,18 +218,28 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 return RedirectToAction("Detail", new { id = report.ReportId });
             }
 
-            report.Status = 1;
+            // ✅ cập nhật trạng thái khi officer phản hồi
+            report.Status = 1; // 1 = Đã phản hồi
             report.Comment = comment;
 
             await _context.SaveChangesAsync();
+
+            await _notifications.CreateAsync(
+                new CreateNotificationRequest(
+                    report.ReporterId,
+                    "report.replied",
+                    "Báo cáo",
+                    $"Báo cáo đã được phản hồi.",
+                    $"{{\"report_id\":{report.ReportId}}}"
+                )
+            );
+
             TempData["SuccessMessage"] = "Phản hồi đã được gửi.";
             return RedirectToAction("Detail", new { id = report.ReportId });
         }
 
-
         [HttpGet]
-        [AuthorizeRole(0,1,2)]
-
+        [AuthorizeRole(0, 1, 2)]
         public async Task<IActionResult> Detail(int id)
         {
             var report = await _context.Reports
@@ -213,13 +248,9 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
             if (report == null) return NotFound();
 
-            // Kiểm tra nếu người dùng hiện tại là cảnh sát
-
             var role = HttpContext.Session.GetInt32("Role");
             ViewBag.IsPolice = (role == 1);
             return View(report);
         }
-
-
     }
 }
