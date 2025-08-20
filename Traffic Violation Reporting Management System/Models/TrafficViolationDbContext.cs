@@ -318,32 +318,6 @@ public partial class TrafficViolationDbContext : DbContext
                 .HasColumnName("name");
         });
 
-        modelBuilder.Entity<Notification>(entity =>
-        {
-            entity.HasKey(e => e.NotificationId);
-
-            entity.ToTable("Notifications");
-
-            entity.Property(e => e.NotificationId).HasColumnName("notification_id");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.Type).HasMaxLength(50).HasColumnName("type");
-            entity.Property(e => e.Title).HasMaxLength(200).HasColumnName("title");
-            entity.Property(e => e.Message).HasMaxLength(500).HasColumnName("message");
-            entity.Property(e => e.DataJson).HasColumnName("data_json");
-            entity.Property(e => e.IsRead).HasColumnName("is_read").HasDefaultValue(false);
-            entity.Property(e => e.CreatedAt)
-                  .HasColumnName("created_at")
-                  .HasColumnType("datetime")
-                  .HasDefaultValueSql("(getdate())");
-
-            entity.HasIndex(e => new { e.UserId, e.IsRead, e.CreatedAt }, "IX_Notifications_User_Read_Created");
-
-            entity.HasOne<User>()
-                  .WithMany()
-                  .HasForeignKey(e => e.UserId)
-                  .OnDelete(DeleteBehavior.Cascade)
-                  .HasConstraintName("FK_Notifications_Users");
-        });
 
         OnModelCreatingPartial(modelBuilder);
     }

@@ -15,5 +15,7 @@ namespace Traffic_Violation_Reporting_Management_System.Models
         public string? DataJson { get; set; }
         public bool IsRead { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public virtual User User { get; set; } = null!;
+
     }
 }
