@@ -1,4 +1,4 @@
-﻿@model List<Traffic_Violation_Reporting_Management_System.Models.Report>
+﻿@model Traffic_Violation_Reporting_Management_System.Helpers.PagedResult<Traffic_Violation_Reporting_Management_System.Models.Report>
 
 @{
     ViewData["Title"] = "Danh sách báo cáo";
@@ -43,11 +43,11 @@
         </tr>
     </thead>
     <tbody>
-        @for (int i = 0; i < Model.Count; i++)
+        @for (int i = 0; i < Model.Items.Count; i++)
         {
-            var item = Model[i];
+            var item = Model.Items[i];
             <tr>
-                <td>@(i + 1)</td> <!-- Hiển thị STT -->
+                <td>@((Model.Page - 1) * Model.PageSize + i + 1)</td>
                 <td>@item.Reporter?.FullName</td>
                 <td>@item.Location</td>
                 <td>@(item.TimeOfViolation?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
@@ -64,3 +64,19 @@
         }
     </tbody>
 </table>
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.Page ? "active" : "")">
+                <a class="page-link" href="@Url.Action("ReportList", new {
+                    page = i,
+                    pageSize = Model.PageSize,
+                    search = ViewBag.Search,
+                    status = ViewBag.Status,
+                    sortOrder = ViewBag.SortOrder
+                })">@i</a>
+            </li>
+        }
+    </ul>
+</nav>

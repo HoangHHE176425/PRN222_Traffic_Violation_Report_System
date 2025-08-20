@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Traffic_Violation_Reporting_Management_System.Helpers;
 using Traffic_Violation_Reporting_Management_System.Models;
 namespace Traffic_Violation_Reporting_Management_System.Controllers
 {
@@ -13,7 +14,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
         }
         [AuthorizeRole(1,2)]
 
-        public IActionResult ReportList(string search, int? status, string sortOrder)
+        public IActionResult ReportList(string search, int? status, string sortOrder, int page = 1, int pageSize = 10)
         {
             var query = _context.Reports
                 .Include(r => r.Reporter)
@@ -59,9 +60,14 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                     break;
             }
 
-            var result = query.ToList();
+            var pagedResult = query.GetPaged(page, pageSize);
 
-            return View("ReportList", result);
+            // Giữ lại giá trị lọc và sắp xếp khi phân trang
+            ViewBag.Search = search;
+            ViewBag.Status = status;
+            ViewBag.SortOrder = sortOrder;
+
+            return View("ReportList", pagedResult);
         }
         private int? GetCurrentUserIdFromSession()
         {
@@ -70,11 +76,12 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
         [AuthorizeRole(0)]
 
-        public IActionResult ReportHistory(string search, int? status)
+        public IActionResult ReportHistory(string search, int? status, int page = 1, int pageSize = 10)
         {
             var userId = GetCurrentUserIdFromSession();
             if (userId == null)
                 return RedirectToAction("Login", "Auth");
+
             var query = _context.Reports
                 .Include(r => r.Reporter)
                 .Where(r => r.ReporterId == userId.Value)
@@ -90,12 +97,16 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 query = query.Where(r => r.Status == status);
             }
 
-            var history = query
-                .OrderByDescending(r => r.CreatedAt)
-                .ToList();
+            query = query.OrderByDescending(r => r.CreatedAt);
 
-            return View("ReportHistory", history);
+            var pagedResult = query.GetPaged(page, pageSize);
+
+            ViewBag.Search = search;
+            ViewBag.Status = status;
+
+            return View("ReportHistory", pagedResult);
         }
+
         [HttpGet]
         [AuthorizeRole(0)]
 

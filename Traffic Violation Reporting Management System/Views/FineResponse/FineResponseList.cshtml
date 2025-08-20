@@ -1,9 +1,9 @@
-﻿@model List<Traffic_Violation_Reporting_Management_System.Models.FineResponse>
+﻿@model Traffic_Violation_Reporting_Management_System.Helpers.PagedResult<Traffic_Violation_Reporting_Management_System.Models.FineResponse>
 @using Microsoft.AspNetCore.Http
 @{
     ViewBag.Title = "Danh sách khiếu nại";
-    int stt = 1;
-    var request = Context.Request; // Use HttpContext to access the Request object
+    var request = Context.Request;
+    int stt = (Model.Page - 1) * Model.PageSize + 1;
 }
 
 <h2>Danh sách Khiếu Nại</h2>
@@ -38,7 +38,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Items)
         {
             <tr>
                 <td>@stt</td>
@@ -57,11 +57,22 @@
     </tbody>
 </table>
 
+<!-- Phân trang -->
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(Model.Page == i ? "active" : "")">
+                <a class="page-link" href="@Url.Action("FineResponseList", new { search = request.Query["search"], status = request.Query["status"], page = i })">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
+
 <script>
     document.getElementById('statusSelect').addEventListener('change', function () {
         const form = document.getElementById('filterForm');
         if (this.value === "") {
-            // Xóa field status trước khi submit để quay lại "Tất cả"
             this.name = "";
         }
         form.submit();

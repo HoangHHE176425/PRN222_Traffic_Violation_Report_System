@@ -1,7 +1,7 @@
-﻿@model List<Traffic_Violation_Reporting_Management_System.Models.FineResponse>
+﻿@model Traffic_Violation_Reporting_Management_System.Helpers.PagedResult<Traffic_Violation_Reporting_Management_System.Models.FineResponse>
 @{
     ViewBag.Title = "Lịch sử khiếu nại";
-    int stt = 1;
+    int stt = (Model.Page - 1) * Model.PageSize + 1;
 }
 
 <h2>Lịch sử Khiếu Nại</h2>
@@ -20,15 +20,13 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Items)
         {
             <tr>
                 <td>@stt</td>
                 <td>@item.FineId</td>
                 <td>@item.Content</td>
-                <td>
-                    @(item.Status == 0 ? "Đang chờ xử lý" : "Đã xử lý")
-                </td>
+                <td>@(item.Status == 0 ? "Đang chờ xử lý" : "Đã xử lý")</td>
                 <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>@(item.Reply ?? "")</td>
                 <td>@(item.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "")</td>
@@ -40,3 +38,15 @@
         }
     </tbody>
 </table>
+
+<!-- Phân trang -->
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(Model.Page == i ? "active" : "")">
+                <a class="page-link" href="@Url.Action("FineResponseHistory", new { page = i })">@i</a>
+            </li>
+        }
+    </ul>
+</nav>

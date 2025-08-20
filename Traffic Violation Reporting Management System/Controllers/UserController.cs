@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using Traffic_Violation_Reporting_Management_System.Helpers;
 using Traffic_Violation_Reporting_Management_System.Models;
 
 namespace Traffic_Violation_Reporting_Management_System.Controllers
@@ -14,7 +15,14 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
         {
              _context = context;
         }
-        public IActionResult UserList(string search, string roleFilter, string statusFilter, string sortOrder)
+        public IActionResult UserList(
+            string search,
+            string roleFilter,
+            string statusFilter,
+            string sortOrder,
+            int page = 1,
+            int pageSize = 7
+        )
         {
             var query = _context.Users.AsQueryable();
 
@@ -50,13 +58,13 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                     query = query.OrderByDescending(u => u.Role);
                     break;
             }
-
+            var pagedResult = query.GetPaged(page, pageSize);
             ViewBag.SelectedSearch = search;
             ViewBag.SelectedRole = roleFilter;
             ViewBag.SelectedStatus = statusFilter;
             ViewBag.SelectedSort = sortOrder;
 
-            return View(query.ToList());
+            return View("UserList", pagedResult);
         }
         public IActionResult Create()
         {

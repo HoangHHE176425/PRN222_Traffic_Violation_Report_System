@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using Traffic_Violation_Reporting_Management_System.Helpers;
 using Traffic_Violation_Reporting_Management_System.Models;
 
 namespace Traffic_Violation_Reporting_Management_System.Controllers
@@ -20,7 +21,10 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
       string modelFilter,
       string colorFilter,
       string statusFilter,
-      string sortOrder)
+      string sortOrder,
+      int page = 1,
+      int pageSize = 10
+            )
         {
             var query = _context.Vehicles.AsQueryable();
 
@@ -70,6 +74,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                     query = query.OrderByDescending(v => v.RegistrationDate); // mặc định
                     break;
             }
+            var pagedResult = query.GetPaged(page, pageSize);
 
             // Gán các filter hiện tại về lại ViewBag để giữ trạng thái chọn
             ViewBag.SelectedBrand = brandFilter;
@@ -101,8 +106,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 .OrderBy(x => x)
                 .ToList();
 
-            var result = query.ToList();
-            return View("VehicleList", result);
+            return View("VehicleList", pagedResult);
         }
 
         [HttpPost]
