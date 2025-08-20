@@ -293,7 +293,7 @@
       const total  = (rc.data && (rc.data.total  ?? rc.data.Total))  ?? 0;
       const unread = (rc.data && (rc.data.unread ?? rc.data.Unread)) ?? 0;
 
-      setBadge(total, origin || "count-all");
+      setBadge(unread, origin || "count-all");
 
       // (tuỳ chọn) cập nhật tiêu đề trong dropdown
       const header = document.querySelector('ul.dropdown-menu .fw-bold.text-center');
@@ -357,11 +357,11 @@
     // Cập nhật badge = TOTAL (ưu tiên counts trong payload nếu có)
     try {
       const counts = payload?.counts;
-      if (counts && typeof counts.total === "number") {
-        setBadge(counts.total, "signalr-payload-total");
-      } else {
-        await refreshCounts("signalr");
-      }
+        if (counts && typeof counts.unread === "number") {
+            setBadge(counts.unread, "signalr-payload-unread");
+        } else {
+            await refreshCounts("signalr");
+        }
     } catch (e) {
       console.log("[notif][notify][update-badge-error]", e);
     }
