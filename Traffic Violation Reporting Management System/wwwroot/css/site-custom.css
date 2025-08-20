@@ -241,4 +241,16 @@ textarea:focus {
     .container {
         max-width: 100% !important;
     }
-} 
+}
+
+/* Badge s? trên chuông thông báo */
+#notif-badge {
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    display: none; /* JS s? b?t khi count > 0 */
+    padding: 0 4px; /* ?? s? 2 ch? v?n g?n */
+    text-align: center;
+    font-weight: 700;
+    border-radius: 999px;
+}

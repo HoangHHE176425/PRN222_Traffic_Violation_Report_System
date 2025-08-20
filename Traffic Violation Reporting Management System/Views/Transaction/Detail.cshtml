@@ -24,6 +24,25 @@
     </tr>
     <tr>
         <th>Ghi chú</th>
-        <td>@Model.Description</td>
+        <td>
+            @{
+                if (Model.Description != null && Model.Description.StartsWith("Thanh toán biên bản #"))
+                {
+                    var fineIdStr = Model.Description.Replace("Thanh toán biên bản #", "");
+                    if (int.TryParse(fineIdStr, out int fineId))
+                    {
+                            <a asp-controller="Fine" asp-action="Detail" asp-route-id="@fineId">@Model.Description</a>
+                    }
+                    else
+                    {
+                        @Model.Description
+                    }
+                }
+                else
+                {
+                    @Model.Description
+                }
+            }
+        </td>
     </tr>
 </table>

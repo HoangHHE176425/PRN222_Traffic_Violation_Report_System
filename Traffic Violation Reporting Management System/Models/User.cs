@@ -27,9 +27,12 @@ public partial class User
 
     public virtual ICollection<FineResponse> FineResponses { get; set; } = new List<FineResponse>();
 
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
     public virtual ICollection<Otp> Otps { get; set; } = new List<Otp>();
 
     public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
 
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+
 }

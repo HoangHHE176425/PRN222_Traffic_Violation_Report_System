@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Traffic_Violation_Reporting_Management_System.DTOs;
 using Traffic_Violation_Reporting_Management_System.Models;
+using Traffic_Violation_Reporting_Management_System.Service;
 using Traffic_Violation_Reporting_Management_System.Helpers;
 
 namespace Traffic_Violation_Reporting_Management_System.Controllers
@@ -10,11 +12,15 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
     {
         private readonly TrafficViolationDbContext _context;
         private readonly SmsService _smsService;
-        public FineController(TrafficViolationDbContext context, SmsService smsService)
+        private readonly INotificationService _notificationService; 
+
+        public FineController(TrafficViolationDbContext context, SmsService smsService, INotificationService notificationService)
         {
             _context = context;
             _smsService = smsService;
+            _notificationService = notificationService; 
         }
+
         [AuthorizeRole(1,2)]
 
         public IActionResult FineList(string search, int? status, string sortOrder, int page = 1, int pageSize = 10)
@@ -158,19 +164,30 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
         [AuthorizeRole(1,2)]
 
         [HttpPost]
-        public IActionResult Create(Fine fine, List<int> behaviorIds, List<decimal> amounts, int? reportId = null)
+        public async Task<IActionResult> Create(Fine fine, List<int> behaviorIds, List<decimal> amounts, int? reportId = null)
         {
             if (string.IsNullOrWhiteSpace(fine.IssuedBy))
+            {
                 ModelState.AddModelError("IssuedBy", "Vui lòng nhập biển số xe.");
+            }
             else
             {
                 // Kiểm tra xem biển số có tồn tại trong bảng Vehicle không
-                bool vehicleExists = _context.Vehicles.Any(v => v.VehicleNumber == fine.IssuedBy);
-                if (!vehicleExists)
+                var vehicle = _context.Vehicles.FirstOrDefault(v => v.VehicleNumber == fine.IssuedBy);
+                if (vehicle == null)
                 {
                     ModelState.AddModelError("IssuedBy", "Biển số xe không tồn tại trong hệ thống.");
                 }
+                else
+                {
+                    // Kiểm tra trạng thái của xe
+                    if (vehicle.Status == 1) // Giả sử 1 = Tạm giam/Thu hồi
+                    {
+                        ModelState.AddModelError("IssuedBy", "Xe này hiện đã bị tạm giam hoặc thu hồi.");
+                    }
+                }
             }
+
 
 
             if (behaviorIds.Count != amounts.Count || behaviorIds.Count == 0)
@@ -179,11 +196,8 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.ViolationBehaviors = _context.ViolationBehaviors
-                    .Select(v => new SelectListItem
-                    {
-                        Value = v.BehaviorId.ToString(),
-                        Text = v.Name
-                    }).ToList();
+                    .Select(v => new SelectListItem { Value = v.BehaviorId.ToString(), Text = v.Name })
+                    .ToList();
                 return View(fine);
             }
 
@@ -191,14 +205,10 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             fine.Status = 0;
             fine.Amount = (int?)amounts.Sum();
 
-            // Gán reportId nếu có
             if (reportId.HasValue)
             {
                 var report = _context.Reports.FirstOrDefault(r => r.ReportId == reportId.Value);
-                if (report != null)
-                {
-                    fine.ReportId = report.ReportId;
-                }
+                if (report != null) fine.ReportId = report.ReportId;
             }
 
             _context.Fines.Add(fine);
@@ -206,37 +216,42 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
             for (int i = 0; i < behaviorIds.Count; i++)
             {
-                var link = new FineViolationBehavior
+                _context.FineViolationBehaviors.Add(new FineViolationBehavior
                 {
                     FineId = fine.FineId,
                     BehaviorId = behaviorIds[i],
                     DecidedAmount = (int?)amounts[i]
-                };
-                _context.FineViolationBehaviors.Add(link);
+                });
             }
-
             _context.SaveChanges();
-            //var userPhone = _context.Users
-            //    .Where(u => _context.Vehicles.Any(v => v.VehicleNumber == fine.IssuedBy && v.OwnerCccd == u.Cccd))
-            //    .Select(u => u.PhoneNumber)
-            //    .FirstOrDefault();
 
-            //if (!string.IsNullOrEmpty(userPhone))
-            //{
-            //    var message = $"Bạn đã bị lập phiếu phạt {fine.Amount} VNĐ vào lúc {fine.CreatedAt?.ToString("dd/MM/yyyy HH:mm")}. Biển số: {fine.IssuedBy}";
-            //    _smsService.SendSms(userPhone, message);
-            //}
+            // Tìm chủ xe và gửi notification (dùng constructor của record)
+            var user = _context.Users
+                .FirstOrDefault(u => _context.Vehicles.Any(v => v.VehicleNumber == fine.IssuedBy && v.OwnerCccd == u.Cccd));
+            if (user != null)
+            {
+                await _notificationService.CreateAsync(
+                    new CreateNotificationRequest(
+                        user.UserId,
+                        "Fine",
+                        "Phiếu phạt mới",
+                        $"Bạn có phiếu phạt mới cho xe {fine.IssuedBy}.",
+                        $"{{ \"fineId\": {fine.FineId} }}"
+                    )
+                );
+            }
 
             return RedirectToAction("FineList");
         }
+
+
         [AuthorizeRole(1,2)]
 
         [HttpPost]
-        public IActionResult Cancel(int id)
+        public async Task<IActionResult> Cancel(int id)
         {
             var fine = _context.Fines.FirstOrDefault(f => f.FineId == id);
-            if (fine == null)
-                return NotFound();
+            if (fine == null) return NotFound();
 
             // Chỉ cho phép hủy nếu chưa thanh toán
             if (fine.Status == 0)
@@ -244,17 +259,22 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 fine.Status = 2; // Đã hủy
                 fine.PaidAt = DateTime.Now;
                 _context.SaveChanges();
-       //         var userPhone = _context.Users
-       //.Where(u => _context.Vehicles.Any(v => v.VehicleNumber == fine.IssuedBy && v.OwnerCccd == u.Cccd))
-       //.Select(u => u.PhoneNumber)
-       //.FirstOrDefault();
 
-       //         if (!string.IsNullOrEmpty(userPhone))
-       //         {
-       //             var message = $"Phiếu phạt cho biển số {fine.IssuedBy} đã bị hủy lúc {fine.PaidAt?.ToString("dd/MM/yyyy HH:mm")}.";
-       //             _smsService.SendSms(userPhone, message);
-       //         }
-           }
+                var user = _context.Users
+                    .FirstOrDefault(u => _context.Vehicles.Any(v => v.VehicleNumber == fine.IssuedBy && v.OwnerCccd == u.Cccd));
+                if (user != null)
+                {
+                    await _notificationService.CreateAsync(
+                        new CreateNotificationRequest(
+                            user.UserId,
+                            "Fine",
+                            "Phiếu phạt đã hủy",
+                            $"Phiếu phạt cho xe {fine.IssuedBy} đã bị hủy.",
+                            $"{{ \"fineId\": {fine.FineId} }}"
+                        )
+                    );
+                }
+            }
 
             return RedirectToAction("FineList");
         }

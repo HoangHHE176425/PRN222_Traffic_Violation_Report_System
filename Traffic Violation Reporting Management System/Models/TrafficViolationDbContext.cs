@@ -16,22 +16,17 @@ public partial class TrafficViolationDbContext : DbContext
     }
 
     public virtual DbSet<Fine> Fines { get; set; }
-
     public virtual DbSet<FineResponse> FineResponses { get; set; }
-
     public virtual DbSet<FineViolationBehavior> FineViolationBehaviors { get; set; }
-
     public virtual DbSet<Otp> Otps { get; set; }
-
     public virtual DbSet<Report> Reports { get; set; }
-
     public virtual DbSet<Transaction> Transactions { get; set; }
-
     public virtual DbSet<User> Users { get; set; }
-
     public virtual DbSet<Vehicle> Vehicles { get; set; }
-
     public virtual DbSet<ViolationBehavior> ViolationBehaviors { get; set; }
+
+    // --- NEW: Notifications DbSet ---
+    public virtual DbSet<Notification> Notifications { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:Default");
@@ -40,7 +35,14 @@ public partial class TrafficViolationDbContext : DbContext
     {
         modelBuilder.Entity<Fine>(entity =>
         {
+            entity.ToTable(tb => tb.UseSqlOutputClause(false));
             entity.HasKey(e => e.FineId).HasName("PK__Fines__F3C688D1F4569110");
+
+            entity.ToTable(tb =>
+                {
+                    tb.HasTrigger("tr_Fines_AfterInsert_Notify");
+                    tb.HasTrigger("tr_Fines_AfterUpdateStatus_Notify");
+                });
 
             entity.Property(e => e.FineId).HasColumnName("fine_id");
             entity.Property(e => e.Amount).HasColumnName("amount");
@@ -118,6 +120,35 @@ public partial class TrafficViolationDbContext : DbContext
                 .HasForeignKey(d => d.FineId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_FVB_Fine");
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__E059842FC9520882");
+
+            entity.HasIndex(e => new { e.UserId, e.IsRead, e.CreatedAt }, "IX_Notifications_User_Read_Created").IsDescending(false, false, true);
+
+            entity.Property(e => e.NotificationId).HasColumnName("notification_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.DataJson).HasColumnName("data_json");
+            entity.Property(e => e.IsRead).HasColumnName("is_read");
+            entity.Property(e => e.Message)
+                .HasMaxLength(500)
+                .HasColumnName("message");
+            entity.Property(e => e.Title)
+                .HasMaxLength(200)
+                .HasColumnName("title");
+            entity.Property(e => e.Type)
+                .HasMaxLength(50)
+                .HasColumnName("type");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Notifications)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_Notifications_Users");
         });
 
         modelBuilder.Entity<Otp>(entity =>
@@ -203,11 +234,8 @@ public partial class TrafficViolationDbContext : DbContext
             entity.HasKey(e => e.UserId).HasName("PK__Users__B9BE370F85D7E3DD");
 
             entity.HasIndex(e => e.Cccd, "UQ_Users_CCCD").IsUnique();
-
             entity.HasIndex(e => e.Email, "UQ_Users_Email").IsUnique();
-
             entity.HasIndex(e => e.Cccd, "UQ__Users__37D42BFA9E95A16E").IsUnique();
-
             entity.HasIndex(e => e.PhoneNumber, "UQ__Users__A1936A6B0324D836").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
@@ -289,6 +317,7 @@ public partial class TrafficViolationDbContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("name");
         });
+
 
         OnModelCreatingPartial(modelBuilder);
     }
