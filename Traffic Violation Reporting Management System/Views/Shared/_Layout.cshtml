@@ -156,11 +156,13 @@
                                 @User.Identity.Name
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
-                                    </a>
-                                </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
+                                            <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                        </a>
+                                    </li>
+
+
                                 <li>
                                     <a class="dropdown-item" href="#">
                                         <i class="bi bi-gear me-2"></i>Cài đặt
@@ -210,49 +212,55 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-    <script>
-        (function () {
-          console.log("[notif] boot");
+<script>
+(function () {
+  console.log("[notif] boot");
 
-          const badge = document.getElementById("notif-badge");
-          const list  = document.getElementById("notif-list");
-          const ddBtn = document.getElementById("notifDropdown");
+  const badge = document.getElementById("notif-badge");
+  const list  = document.getElementById("notif-list");
+  const ddBtn = document.getElementById("notifDropdown");
 
-          if (!badge || !list || !ddBtn) return;
+  if (!badge || !list || !ddBtn) return;
 
           const URL_LIST      = '@Url.Action("Get", "Notifications")';
           const URL_COUNT_ALL = '@Url.Action("CountAll", "Notifications")';   // ⇦ API trả { total, unread }
-          const HUB_URL       = '@Url.Content("~/hubs/notifications")';
+  const HUB_URL       = '@Url.Content("~/hubs/notifications")';
           const VIEW_ALL      = '@Url.Action("Index", "Notifications")';
 
           // ====== HÀM CHUNG: set số trên icon ======
-          function setBadge(count, origin = "unknown") {
-            const n = Math.max(0, Number(count) || 0);
-            const txt = n > 99 ? "99+" : String(n);
-            if (n > 0) {
-              badge.style.display = "inline-block";
-              badge.innerText = txt;
-              badge.setAttribute("aria-label", `Bạn có ${n} thông báo`);
-            } else {
-              badge.style.display = "none";
-              badge.innerText = "0";
-              badge.removeAttribute("aria-label");
-            }
-          }
+  function setBadge(count, origin = "unknown") {
+    const n = Math.max(0, Number(count) || 0);
+    const txt = n > 99 ? "99+" : String(n);
+    console.log("[notif][setBadge]", { origin, input: count, parsed: n, display: txt });
 
-          function setEmpty(msg = "Chưa có thông báo") {
-            list.innerHTML = `<div class="dropdown-item text-muted text-center">${msg}</div>`;
-          }
+    // Bạn muốn 0 thì ẩn hay vẫn hiện?
+    // Nếu muốn LUÔN hiện cả khi 0: bỏ khối if/else và luôn set display = inline-block.
+    if (n > 0) {
+      badge.style.display = "inline-block";
+      badge.innerText = txt;
+      badge.setAttribute("aria-label", `Bạn có ${n} thông báo`);
+      console.log("[notif][setBadge] hiển thị badge:", badge.innerText);
+    } else {
+      badge.style.display = "none";
+      badge.innerText = "0";
+      badge.removeAttribute("aria-label");
+      console.log("[notif][setBadge] ẩn badge (0 thông báo)");
+    }
+  }
 
-                function render(items, append=false) {
-          if (!append) list.innerHTML = "";
-          if (!Array.isArray(items) || items.length === 0) {
-            if (!append) setEmpty();
-            return;
-          }
-          for (const n of items) {
-            const title   = n.title ?? n.Title ?? "";
-            const message = n.message ?? n.Message ?? "";
+  function setEmpty(msg = "Chưa có thông báo") {
+    list.innerHTML = `<div class="dropdown-item text-muted text-center">${msg}</div>`;
+  }
+
+  function render(items, append=false) {
+    if (!append) list.innerHTML = "";
+    if (!Array.isArray(items) || items.length === 0) {
+      if (!append) setEmpty();
+      return;
+    }
+    for (const n of items) {
+      const title   = n.title ?? n.Title ?? "";
+      const message = n.message ?? n.Message ?? "";
             const timeRaw = n.createdAt ?? n.createdAtUtc ?? n.CreatedAt ?? n.CreatedAtUtc ?? "";
             let timeStr = "";
             if (timeRaw) {
@@ -266,93 +274,101 @@
                 timeStr = `${dd}/${MM}/${yyyy} ${hh}:${mm}`;
             }
 
-            const a = document.createElement("a");
-            a.className = "dropdown-item small";
-            a.href = VIEW_ALL;
-            a.innerHTML = `
-              <div class="fw-bold">${title}</div>
+      const a = document.createElement("a");
+      a.className = "dropdown-item small";
+      a.href = VIEW_ALL;
+      a.innerHTML = `
+        <div class="fw-bold">${title}</div>
               <div class="text-muted" style="font-size:0.8rem">${message}</div>
               <div class="text-muted" style="font-size:0.7rem">${timeStr}</div>
             `;
-            list.appendChild(a);
-          }
-        }
+      list.appendChild(a);
+    }
+  }
 
 
 
 
-          async function fetchJson(url) {
-            try {
-              const res = await fetch(url, { credentials: 'same-origin' });
-              const text = await res.text();
-              let data = null;
+  async function fetchJson(url) {
+    console.log('[notif][fetch] -->', url);
+    try {
+      const res = await fetch(url, { credentials: 'same-origin' });
+      const text = await res.text();
+      console.log('[notif][fetch][response]', { status: res.status, ok: res.ok, textPreview: text.slice(0, 200) });
+      let data = null;
               try { data = text ? JSON.parse(text) : null; } catch { }
-              return { ok: res.ok, status: res.status, data, text };
-            } catch (err) {
+      return { ok: res.ok, status: res.status, data, text };
+    } catch (err) {
               console.error("[notif][fetch][network-error]", err);
-              throw err;
-            }
-          }
+      throw err;
+    }
+  }
 
           // 🔑 Lấy TOTAL & UNREAD
-          async function refreshCounts(origin) {
-            try {
-              const rc = await fetchJson(URL_COUNT_ALL);
-              const unread = (rc.data && (rc.data.unread ?? rc.data.Unread)) ?? 0;
-              setBadge(unread, origin || "count-all");
-            } catch (e) {
-              console.log("[notif][refreshCounts][ERROR]", e);
-              setBadge(0, origin || "count-all-error");
-            }
-          }
+  async function refreshCounts(origin) {
+    try {
+      console.log("[notif][refreshCounts] start", origin);
+      const rc = await fetchJson(URL_COUNT_ALL);
+      const total  = (rc.data && (rc.data.total  ?? rc.data.Total))  ?? 0;
+      const unread = (rc.data && (rc.data.unread ?? rc.data.Unread)) ?? 0;
 
-          async function loadLatest() {
+      setBadge(unread, origin || "count-all");
+
+      // (tuỳ chọn) cập nhật tiêu đề trong dropdown
+      const header = document.querySelector('ul.dropdown-menu .fw-bold.text-center');
+    } catch (e) {
+      console.log("[notif][refreshCounts][ERROR]", e);
+      setBadge(0, origin || "count-all-error");
+    }
+  }
+
+  async function loadLatest() {
             // 1) cập nhật badge
-            await refreshCounts("loadLatest");
+    await refreshCounts("loadLatest");
             // 2) lấy danh sách
-            try {
-              const r = await fetchJson(URL_LIST + "?onlyUnread=false&page=1&pageSize=5");
-              if (!r.ok) { setEmpty("Không tải được thông báo (HTTP " + r.status + ")"); return; }
-              if (!Array.isArray(r.data)) { setEmpty("Dữ liệu không hợp lệ"); return; }
-              render(r.data, false);
-            } catch (e) {
-              console.log("[notif][list][ERROR]", e);
-              setEmpty("Có lỗi khi tải thông báo");
-            }
-          }
+    try {
+      const r = await fetchJson(URL_LIST + "?onlyUnread=false&page=1&pageSize=5");
+      if (!r.ok) { setEmpty("Không tải được thông báo (HTTP " + r.status + ")"); return; }
+      if (!Array.isArray(r.data)) { setEmpty("Dữ liệu không hợp lệ"); return; }
+      render(r.data, false);
+    } catch (e) {
+      console.log("[notif][list][ERROR]", e);
+      setEmpty("Có lỗi khi tải thông báo");
+    }
+  }
 
           // Sự kiện dropdown vẫn giữ để chắc chắn luôn mới khi người dùng mở
-          ddBtn.addEventListener("show.bs.dropdown", () => { loadLatest(); });
+  ddBtn.addEventListener("show.bs.dropdown", () => { loadLatest(); });
 
-          // Fallback: gọi 1 lần sau 1s
-          setTimeout(() => loadLatest(), 1000);
+  // Fallback: gọi 1 lần sau 1s
+  setTimeout(() => loadLatest(), 1000);
 
-          // SignalR
-          const connection = new signalR.HubConnectionBuilder()
-              .withUrl(HUB_URL)
-              .withAutomaticReconnect()
-              .build();
+  // SignalR
+  const connection = new signalR.HubConnectionBuilder()
+      .withUrl(HUB_URL)
+      .withAutomaticReconnect()
+      .build();
 
           // 🔔 Mỗi khi server bắn notify → tự động load mới
         // Khi có notify từ server
-        connection.on("notify", async (payload) => {
-            console.log("[notif] SignalR notify:", payload);
+  connection.on("notify", async (payload) => {
+    console.log("[notif] SignalR notify:", payload);
 
             if (payload.counts && typeof payload.counts.unread === "number") {
                 setBadge(payload.counts.unread, "signalr");
-            }
+    }
 
             // ✅ Tự động load lại danh sách luôn (real-time)
             await loadLatest();
-        });
+  });
 
 
 
-          connection.start()
-            .then(() => console.log("[notif] SignalR connected:", HUB_URL))
-            .catch(err => console.error("[notif] SignalR error:", err));
-        })();
-    </script>
+  connection.start()
+    .then(() => console.log("[notif] SignalR connected:", HUB_URL))
+    .catch(err => console.error("[notif] SignalR error:", err));
+})();
+</script>
 
 
 

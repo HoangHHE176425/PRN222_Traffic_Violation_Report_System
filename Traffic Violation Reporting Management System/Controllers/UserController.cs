@@ -253,6 +253,19 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
             return RedirectToAction("Detail", new { id = user.UserId });
         }
+        [AuthorizeRole(0, 1, 2)] // mọi role đều có thể xem profile
+        public IActionResult Profile()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+                return RedirectToAction("Login", "Auth");
+
+            var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
+            if (user == null)
+                return NotFound();
+
+            return View("Profile", user);
+        }
 
 
     }

@@ -133,17 +133,23 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             if (userId == null)
                 return RedirectToAction("Login", "Auth");
 
+            // Clear and validate again
             ModelState.Clear();
+
             if (string.IsNullOrWhiteSpace(report.Location))
                 ModelState.AddModelError(nameof(report.Location), "Địa điểm không được để trống.");
+
             if (!report.TimeOfViolation.HasValue)
                 ModelState.AddModelError(nameof(report.TimeOfViolation), "Vui lòng chọn thời gian vi phạm.");
             else if (report.TimeOfViolation > DateTime.Now)
                 ModelState.AddModelError(nameof(report.TimeOfViolation), "Thời gian vi phạm không được vượt quá hiện tại.");
             if (string.IsNullOrWhiteSpace(report.Description))
                 ModelState.AddModelError(nameof(report.Description), "Chú thích là bắt buộc.");
+
             if (media == null || media.Length == 0)
                 ModelState.AddModelError("media", "Bạn cần tải lên ảnh hoặc video.");
+            else if (media.Length > 100 * 1024 * 1024) // 100MB
+                ModelState.AddModelError("media", "Tệp tải lên không được vượt quá 100MB.");
 
             if (!ModelState.IsValid)
                 return View(report);
@@ -166,6 +172,9 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 report.MediaPath = "/uploads/" + fileName;
                 report.MediaType = media.ContentType;
                 report.Status = 0; // Pending
+
+                // ✅ gán trạng thái mặc định
+                report.Status = 0; // 0 = Pending/Chưa xử lý
 
                 _context.Reports.Add(report);
                 await _context.SaveChangesAsync();
@@ -225,6 +234,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
 
             report.Status = 1; // Đã phản hồi
             report.Comment = comment;
+
             await _context.SaveChangesAsync();
 
             await _notifications.CreateAsync(

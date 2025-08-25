@@ -13,7 +13,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
     {
         private readonly TrafficViolationDbContext _context;
         private readonly SmsService _smsService;
-        private readonly INotificationService _notificationService;
+        private readonly INotificationService _notificationService; 
         private readonly IHubContext<NotificationHub> _hubContext;
 
         public FineController(
@@ -24,7 +24,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
         {
             _context = context;
             _smsService = smsService;
-            _notificationService = notificationService;
+            _notificationService = notificationService; 
             _hubContext = hubContext;
         }
 
