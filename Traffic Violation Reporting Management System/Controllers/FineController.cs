@@ -5,6 +5,7 @@ using Traffic_Violation_Reporting_Management_System.DTOs;
 using Traffic_Violation_Reporting_Management_System.Models;
 using Traffic_Violation_Reporting_Management_System.Service;
 using Traffic_Violation_Reporting_Management_System.Helpers;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Traffic_Violation_Reporting_Management_System.Controllers
 {
@@ -12,13 +13,19 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
     {
         private readonly TrafficViolationDbContext _context;
         private readonly SmsService _smsService;
-        private readonly INotificationService _notificationService; 
+        private readonly INotificationService _notificationService;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public FineController(TrafficViolationDbContext context, SmsService smsService, INotificationService notificationService)
+        public FineController(
+            TrafficViolationDbContext context,
+            SmsService smsService,
+            INotificationService notificationService,
+            IHubContext<NotificationHub> hubContext)
         {
             _context = context;
             _smsService = smsService;
-            _notificationService = notificationService; 
+            _notificationService = notificationService;
+            _hubContext = hubContext;
         }
 
         [AuthorizeRole(1,2)]
@@ -239,7 +246,18 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                         $"{{ \"fineId\": {fine.FineId} }}"
                     )
                 );
+
+                // 🚀 Bắn signalr tới group user này
+                var unread = _context.Notifications.Count(n => n.UserId == user.UserId && !n.IsRead);
+                await _hubContext.Clients.Group($"user:{user.UserId}")
+                    .SendAsync("notify", new
+                    {
+                        counts = new { unread },
+                        title = "Phiếu phạt mới",
+                        message = $"Bạn có phiếu phạt mới cho xe {fine.IssuedBy}."
+                    });
             }
+
 
             return RedirectToAction("FineList");
         }
@@ -273,7 +291,17 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                             $"{{ \"fineId\": {fine.FineId} }}"
                         )
                     );
+
+                    var unread = _context.Notifications.Count(n => n.UserId == user.UserId && !n.IsRead);
+                    await _hubContext.Clients.Group($"user:{user.UserId}")
+                        .SendAsync("notify", new
+                        {
+                            counts = new { unread },
+                            title = "Phiếu phạt đã hủy",
+                            message = $"Phiếu phạt cho xe {fine.IssuedBy} đã bị hủy."
+                        });
                 }
+
             }
 
             return RedirectToAction("FineList");

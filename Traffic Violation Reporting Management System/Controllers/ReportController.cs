@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 using Traffic_Violation_Reporting_Management_System.Helpers;
 using Traffic_Violation_Reporting_Management_System.Models;
 using Traffic_Violation_Reporting_Management_System.Service;
@@ -11,11 +12,16 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
     {
         private readonly TrafficViolationDbContext _context;
         private readonly INotificationService _notifications;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public ReportController(TrafficViolationDbContext context, INotificationService notifications)
+        public ReportController(
+            TrafficViolationDbContext context,
+            INotificationService notifications,
+            IHubContext<NotificationHub> hubContext)
         {
             _context = context;
             _notifications = notifications;
+            _hubContext = hubContext;
         }
 
         public IActionResult ReportList(string search, int? status, string sortOrder, int page = 1, int pageSize = 10)
@@ -127,24 +133,17 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             if (userId == null)
                 return RedirectToAction("Login", "Auth");
 
-            // Clear and validate again
             ModelState.Clear();
-
             if (string.IsNullOrWhiteSpace(report.Location))
                 ModelState.AddModelError(nameof(report.Location), "Địa điểm không được để trống.");
-
             if (!report.TimeOfViolation.HasValue)
                 ModelState.AddModelError(nameof(report.TimeOfViolation), "Vui lòng chọn thời gian vi phạm.");
             else if (report.TimeOfViolation > DateTime.Now)
-                ModelState.AddModelError(nameof(report.TimeOfViolation), "Thời gian vi phạm không được vượt quá thời điểm hiện tại.");
-
+                ModelState.AddModelError(nameof(report.TimeOfViolation), "Thời gian vi phạm không được vượt quá hiện tại.");
             if (string.IsNullOrWhiteSpace(report.Description))
                 ModelState.AddModelError(nameof(report.Description), "Chú thích là bắt buộc.");
-
             if (media == null || media.Length == 0)
                 ModelState.AddModelError("media", "Bạn cần tải lên ảnh hoặc video.");
-            else if (media.Length > 100 * 1024 * 1024) // 100MB
-                ModelState.AddModelError("media", "Tệp tải lên không được vượt quá 100MB.");
 
             if (!ModelState.IsValid)
                 return View(report);
@@ -152,8 +151,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
             try
             {
                 var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                if (!Directory.Exists(uploadsPath))
-                    Directory.CreateDirectory(uploadsPath);
+                if (!Directory.Exists(uploadsPath)) Directory.CreateDirectory(uploadsPath);
 
                 var fileName = Path.GetFileName(media.FileName);
                 var filePath = Path.Combine(uploadsPath, fileName);
@@ -167,14 +165,12 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 report.CreatedAt = DateTime.Now;
                 report.MediaPath = "/uploads/" + fileName;
                 report.MediaType = media.ContentType;
-
-                // ✅ gán trạng thái mặc định
-                report.Status = 0; // 0 = Pending/Chưa xử lý
+                report.Status = 0; // Pending
 
                 _context.Reports.Add(report);
                 await _context.SaveChangesAsync();
 
-                // Gửi thông báo: báo cáo mới cho Officer
+                // Gửi thông báo tới tất cả Officer
                 var officers = await _context.Users
                     .Where(u => u.Role == 1 && u.IsActive == true)
                     .Select(u => u.UserId)
@@ -191,6 +187,16 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                             $"{{\"report_id\":{report.ReportId}}}"
                         )
                     );
+
+                    // 🔔 Bắn SignalR realtime cho officer
+                    var unread = _context.Notifications.Count(n => n.UserId == officerId && !n.IsRead);
+                    await _hubContext.Clients.Group($"user:{officerId}")
+                        .SendAsync("notify", new
+                        {
+                            counts = new { unread },
+                            title = "Báo cáo mới",
+                            message = $"Có báo cáo mới."
+                        });
                 }
 
                 TempData["SuccessMessage"] = "Báo cáo đã được gửi thành công.";
@@ -209,8 +215,7 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
         public async Task<IActionResult> Reply(int id, string comment)
         {
             var report = await _context.Reports.FirstOrDefaultAsync(r => r.ReportId == id);
-            if (report == null)
-                return NotFound();
+            if (report == null) return NotFound();
 
             if (string.IsNullOrWhiteSpace(comment))
             {
@@ -218,10 +223,8 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                 return RedirectToAction("Detail", new { id = report.ReportId });
             }
 
-            // ✅ cập nhật trạng thái khi officer phản hồi
-            report.Status = 1; // 1 = Đã phản hồi
+            report.Status = 1; // Đã phản hồi
             report.Comment = comment;
-
             await _context.SaveChangesAsync();
 
             await _notifications.CreateAsync(
@@ -229,10 +232,20 @@ namespace Traffic_Violation_Reporting_Management_System.Controllers
                     report.ReporterId,
                     "report.replied",
                     "Báo cáo",
-                    $"Báo cáo đã được phản hồi.",
+                    $"Báo cáo của bạn đã được phản hồi.",
                     $"{{\"report_id\":{report.ReportId}}}"
                 )
             );
+
+            // 🔔 Bắn SignalR realtime cho Reporter
+            var unread = _context.Notifications.Count(n => n.UserId == report.ReporterId && !n.IsRead);
+            await _hubContext.Clients.Group($"user:{report.ReporterId}")
+                .SendAsync("notify", new
+                {
+                    counts = new { unread },
+                    title = "Báo cáo",
+                    message = $"Báo cáo của bạn đã được phản hồi."
+                });
 
             TempData["SuccessMessage"] = "Phản hồi đã được gửi.";
             return RedirectToAction("Detail", new { id = report.ReportId });

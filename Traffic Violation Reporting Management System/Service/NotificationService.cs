@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Traffic_Violation_Reporting_Management_System.DTOs;
 using Traffic_Violation_Reporting_Management_System.Models;
+using Traffic_Violation_Reporting_Management_System.Service;
 
 namespace Traffic_Violation_Reporting_Management_System.Service
 {

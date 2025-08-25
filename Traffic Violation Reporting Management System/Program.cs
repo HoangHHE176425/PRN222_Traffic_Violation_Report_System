@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Traffic_Violation_Reporting_Management_System;
 using Traffic_Violation_Reporting_Management_System.Models;
 using Traffic_Violation_Reporting_Management_System.Service;
+using Traffic_Violation_Reporting_Management_System.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
