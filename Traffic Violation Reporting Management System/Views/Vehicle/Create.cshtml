@@ -1,0 +1,87 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Models.Vehicle
+@{
+    ViewData["Title"] = "Thêm phương tiện";
+}
+
+<h3>Thêm phương tiện mới</h3>
+
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label asp-for="VehicleNumber" class="form-label">Biển số xe</label>
+            <input asp-for="VehicleNumber" class="form-control" />
+            <span asp-validation-for="VehicleNumber" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="OwnerName" class="form-label">Tên chủ sở hữu</label>
+            <input asp-for="OwnerName" class="form-control" />
+            <span asp-validation-for="OwnerName" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="OwnerCccd" class="form-label">CCCD chủ sở hữu</label>
+        <input asp-for="OwnerCccd" class="form-control" />
+        <span asp-validation-for="OwnerCccd" class="text-danger"></span>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label asp-for="OwnerPhoneNumber" class="form-label">Số điện thoại chủ sở hữu</label>
+            <input asp-for="OwnerPhoneNumber" class="form-control" />
+            <span asp-validation-for="OwnerPhoneNumber" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Address" class="form-label">Địa chỉ</label>
+            <input asp-for="Address" class="form-control" />
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label asp-for="ChassicNo" class="form-label">Số khung</label>
+            <input asp-for="ChassicNo" class="form-control" />
+            <span asp-validation-for="ChassicNo" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="EngineNo" class="form-label">Số máy</label>
+            <input asp-for="EngineNo" class="form-control" />
+            <span asp-validation-for="EngineNo" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label asp-for="Brand" class="form-label">Hãng xe</label>
+            <input asp-for="Brand" class="form-control" />
+            <span asp-validation-for="Brand" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Model" class="form-label">Dòng xe</label>
+            <input asp-for="Model" class="form-control" />
+            <span asp-validation-for="Model" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Color" class="form-label">Màu xe</label>
+            <input asp-for="Color" class="form-control" />
+            <span asp-validation-for="Color" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="RegistrationDate" class="form-label">Ngày đăng ký</label>
+        <input asp-for="RegistrationDate" class="form-control" type="date" />
+        <span asp-validation-for="RegistrationDate" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Thêm</button>
+    <a asp-action="VehicleList" class="btn btn-secondary">Quay lại</a>
+</form>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

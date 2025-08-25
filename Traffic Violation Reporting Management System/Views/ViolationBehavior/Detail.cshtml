@@ -1,0 +1,41 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Models.ViolationBehavior
+@{
+    ViewData["Title"] = "Chi tiết lỗi vi phạm giao thông";
+}
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<form asp-action="EditDetail" method="post" novalidate>
+    <input type="hidden" asp-for="BehaviorId" />
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="MinFineAmount" class="form-label"></label>
+        <input asp-for="MinFineAmount" type="number" class="form-control" />
+        <span asp-validation-for="MinFineAmount" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="MaxFineAmount" class="form-label"></label>
+        <input asp-for="MaxFineAmount" type="number" class="form-control" />
+        <span asp-validation-for="MaxFineAmount" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+    <a asp-action="ViolationBehaviorList" class="btn btn-secondary">Quay lại</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

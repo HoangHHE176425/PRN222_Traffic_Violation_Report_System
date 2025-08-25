@@ -1,0 +1,70 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Helpers.PagedResult<Traffic_Violation_Reporting_Management_System.Models.Report>
+
+
+@{
+    ViewData["Title"] = "Lịch sử báo cáo của tôi";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- Nút tạo báo cáo -->
+<a asp-action="Create" asp-controller="Report" class="btn btn-success mb-3">
+    + Tạo báo cáo mới
+</a>
+
+<!-- Form tìm kiếm và lọc trạng thái -->
+<form asp-action="ReportHistory" method="get" class="form-inline mb-3">
+    <input type="text" name="search" value="@Context.Request.Query["search"]" placeholder="Tìm theo địa điểm" class="form-control mr-2" />
+
+    <select name="status" class="form-control mr-2" onchange="this.form.submit()">
+        <option value="">-- Tất cả trạng thái --</option>
+        <option value="0" selected="@(Context.Request.Query["status"] == "0")">Chưa xử lý</option>
+        <option value="1" selected="@(Context.Request.Query["status"] == "1")">Đã xử lý</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>STT</th> <!-- Thêm cột STT -->
+            <th>Địa điểm</th>
+            <th>Thời gian vi phạm</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th>Chi tiết</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Items.Count; i++)
+        {
+            var item = Model.Items[i];
+            <tr>
+                <td>@((Model.Page - 1) * Model.PageSize + i + 1)</td>
+                <td>@item.Location</td>
+                <td>@(item.TimeOfViolation?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                <td>@(item.Status == 1 ? "Đã xử lý" : "Chưa xử lý")</td>
+                <td>@(item.CreatedAt != null ? item.CreatedAt.ToString("dd/MM/yyyy HH:mm") : "N/A")</td> <!-- Fixed issue -->
+                <td>
+                    <a asp-action="Detail" asp-route-id="@item.ReportId" class="btn btn-sm btn-info">Xem chi tiết</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.Page ? "active" : "")">
+                <a class="page-link" href="@Url.Action("ReportHistory", new {
+                    page = i,
+                    pageSize = Model.PageSize,
+                    search = ViewBag.Search,
+                    status = ViewBag.Status
+                })">@i</a>
+            </li>
+        }
+    </ul>
+</nav>

@@ -1,0 +1,134 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Helpers.PagedResult<Traffic_Violation_Reporting_Management_System.Models.User>
+@{
+    ViewData["Title"] = "Danh sách người dùng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Danh sách người dùng</h3>
+    <a asp-action="Create" class="btn btn-success">+ Thêm người dùng</a>
+</div>
+
+<form method="get" asp-action="UserList" class="row gx-2 gy-2 align-items-center mb-3">
+    <div class="col-auto flex-grow-1">
+        <input type="text" name="search" value="@ViewBag.SelectedSearch" class="form-control" placeholder="Tìm theo tên, CCCD, email, SĐT, địa chỉ" />
+    </div>
+
+    <div class="col-auto">
+        <select name="roleFilter" class="form-select" onchange="this.form.submit()">
+            <option value="">-- Vai trò --</option>
+            <option value="0" selected="@(ViewBag.SelectedRole == "0")">Người dùng</option>
+            <option value="1" selected="@(ViewBag.SelectedRole == "1")">Cảnh sát giao thông</option>
+            <option value="2" selected="@(ViewBag.SelectedRole == "2")">Quản trị viên</option>
+        </select>
+    </div>
+
+    <div class="col-auto">
+        <select name="statusFilter" class="form-select" onchange="this.form.submit()">
+            <option value="">-- Trạng thái --</option>
+            <option value="true" selected="@(ViewBag.SelectedStatus == "true")">Hoạt động</option>
+            <option value="false" selected="@(ViewBag.SelectedStatus == "false")">Bị khóa</option>
+        </select>
+    </div>
+
+    <div class="col-auto">
+        <select name="sortOrder" class="form-select" onchange="this.form.submit()">
+            <option value="">Sắp xếp</option>
+            <option value="created_asc" selected="@(ViewBag.SelectedSort == "created_asc")">Ngày tạo ↑</option>
+            <option value="created_desc" selected="@(ViewBag.SelectedSort == "created_desc")">Ngày tạo ↓</option>
+        </select>
+    </div>
+
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+    </div>
+</form>
+
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>STT</th>
+            <th>Tên</th>
+            <th>CCCD</th>
+            <th>Email</th>
+            <th>SĐT</th>
+            <th>Địa chỉ</th>
+            <th>Vai trò</th>
+            <th>Ngày tạo</th>
+            <th>Trạng thái</th>
+            <th>Chi tiết</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @for (int i = 0; i < Model.Items.Count; i++)
+        {
+            var user = Model.Items[i];
+            <tr>
+                <td>@((Model.Page - 1) * Model.PageSize + i + 1)</td>
+                <td>@user.FullName</td>
+                <td>@user.Cccd</td>
+                <td>@user.Email</td>
+                <td>@user.PhoneNumber</td>
+                <td>@user.Address</td>
+                <td>
+                    @(user.Role switch
+                    {
+                        0 => "Người dùng",
+                        1 => "Cảnh sát giao thông",
+                        2 => "Quản trị viên",
+                        _ => "Không xác định"
+                    })
+            </td>
+            <td>@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+            <td>
+                <form asp-action="ChangeStatus" method="post">
+                    <input type="hidden" name="id" value="@user.UserId" />
+                    <select name="newStatus" class="form-select form-select-sm d-inline w-auto"
+                            onchange="confirmAndSubmit(this)">
+                        <option value="true" selected="@(user.IsActive == true ? "selected" : null)">Hoạt động</option>
+                        <option value="false" selected="@(user.IsActive == false ? "selected" : null)">Bị khóa</option>
+                    </select>
+                </form>
+            </td>
+            <td>
+                <a asp-action="Detail" asp-route-id="@user.UserId" class="btn btn-info btn-sm">Chi tiết</a>
+            </td>
+        </tr>
+                }
+    </tbody>
+
+</table>
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.Page ? "active" : "")">
+                <a class="page-link" href="@Url.Action("UserList", new {
+                    page = i,
+                    pageSize = Model.PageSize,
+                    search = ViewBag.Search,
+                    status = ViewBag.Status,
+                    sortOrder = ViewBag.SortOrder
+                })">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
+<script>
+    function confirmAndSubmit(selectElement) {
+        const form = selectElement.closest("form");
+        const selectedText = selectElement.options[selectElement.selectedIndex].text;
+
+        if (confirm(`Bạn có chắc chắn muốn chuyển trạng thái sang "${selectedText}" không?`)) {
+            form.submit();
+        } else {
+            // Trả về trạng thái cũ nếu hủy
+            const originalValue = [...selectElement.options].find(opt => opt.defaultSelected);
+            if (originalValue) {
+                selectElement.value = originalValue.value;
+            }
+        }
+    }
+ 
+</script>

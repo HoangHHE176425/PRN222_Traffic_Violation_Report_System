@@ -1,0 +1,476 @@
+﻿@*
+
+    This is the homepage of the traffic management system.
+
+    It displays key information about traffic safety, news, and weather.
+
+*@
+
+
+
+<!DOCTYPE html>
+
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hệ Thống Quản Lý Giao Thông</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+
+                body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+            background-color: #cfe8ff; /* Màu nền mới, đậm hơn */
+
+
+        }
+
+
+
+                .header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 15px 5px;
+                        background-color: #ffffff;
+                        border-bottom: 1px solid #e0e0e0;
+
+        }
+
+
+
+                .header-left {
+                        display: flex;
+                        align-items: center;
+
+        }
+
+
+
+                    .header-left h3 {
+                            margin: 0;
+                            color: #333;
+                            font-size: 1.2em;
+
+        }
+
+
+
+                    .header-left .nav-links {
+                            display: flex;
+                            margin-left: 20px;
+
+        }
+
+
+
+                        .header-left .nav-links a {
+                                text-decoration: none;
+                                color: #555;
+                                margin-right: 20px;
+                                font-size: 0.9em;
+
+        }
+
+
+
+                            .header-left .nav-links a i {
+                                    margin-right: 5px;
+
+        }
+
+
+
+                .header-right {
+                        display: flex;
+                        align-items: center;
+
+        }
+
+
+
+                    .header-right span {
+                            margin-left: 15px;
+                            color: #333;
+                            font-weight: bold;
+
+        }
+
+
+
+                .content-main {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+
+        }
+
+
+
+                .hero-banner {
+                        width: 100%;
+                        height: 400px;
+                        background-image: url('https://st.download.vn/data/image/2020/10/13/An-toan-giao-thong-700.jpg');
+                        background-size: cover;
+                        background-position: center;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                        position: relative;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        color: white;
+                        text-align: center;
+                        padding: 20px;
+
+        }
+
+
+
+                    .hero-banner::after {
+                            content: '';
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                background-color: rgba(255, 255, 255, 0.25); /* Độ mờ tăng lên để chữ dễ đọc hơn */
+
+                            border-radius: 10px;
+
+        }
+
+
+
+                .banner-content {
+                        z-index: 1;
+
+        }
+
+
+
+                    .banner-content h1 {
+                            font-size: 3em;
+                            margin-bottom: 10px;
+
+        }
+
+
+
+                    .banner-content p {
+                            font-size: 1.2em;
+
+        }
+
+
+
+                .section-title {
+                        text-align: center;
+                        margin: 40px 0 20px;
+                        font-size: 2em;
+                        color: #333;
+
+        }
+
+
+
+                .section-container {
+                        width: 100%;
+                        padding: 0 30px;
+                        box-sizing: border-box;
+                        margin-bottom: 30px;
+
+        }
+
+
+
+                .news-container {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                        gap: 20px;
+
+        }
+
+
+
+                .news-card {
+                        background-color: #ffffff;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                        overflow: hidden;
+                        text-decoration: none;
+                        color: inherit;
+                        transition: transform 0.2s;
+
+        }
+
+
+
+                    .news-card:hover {
+                            transform: translateY(-5px);
+
+        }
+
+
+
+                .news-image {
+                        width: 100%;
+                        height: 200px;
+                        object-fit: cover;
+
+        }
+
+
+
+                .news-content {
+                        padding: 15px;
+
+        }
+
+
+
+                    .news-content h4 {
+                            margin-top: 0;
+                            font-size: 1.1em;
+                            line-height: 1.4;
+                            color: #333;
+
+        }
+
+
+
+                    .news-content p {
+                            font-size: 0.9em;
+                            color: #666;
+                            margin-bottom: 0;
+
+        }
+
+
+
+                .info-cards-container {
+                        display: flex;
+                        justify-content: center;
+                        gap: 20px;
+
+        }
+
+
+
+                .card {
+                        background-color: #ffffff;
+                        border-radius: 10px;
+                        padding: 20px;
+                        flex: 1;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        text-align: left;
+
+        }
+
+
+
+                    .card.blue {
+                            border-top: 5px solid #2d70c9;
+
+        }
+
+
+
+                    .card.green {
+                            border-top: 5px solid #6cb344;
+
+        }
+
+
+
+                    .card.yellow {
+                            border-top: 5px solid #f6b43d;
+
+        }
+
+
+
+                    .card.red {
+                            border-top: 5px solid #e75c6d;
+
+        }
+
+
+
+                    .card h4 {
+                            margin-top: 0;
+                            font-size: 1.1em;
+                            font-weight: bold;
+                            color: #333;
+
+        }
+
+
+
+                    .card p {
+                            font-size: 0.9em;
+                            color: #555;
+                            line-height: 1.4;
+
+        }
+
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+    @*Header Section*@
+
+    <div class="header">
+
+        <div class="header-left">
+
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Check_green_icon.svg/1024px-Check_green_icon.svg.png" alt="Logo" style="height: 40px; margin-right: 15px;">
+
+            <h3>Hệ Thống Quản Lý Giao Thông</h3>
+
+        </div>
+
+    </div>
+
+
+
+    @*Main Content*@
+
+    <div class="content-main">
+
+        <div class="hero-banner">
+
+            <div class="banner-content">
+
+                <h1>Vì một Sơn Tây Xanh - Sạch - An toàn</h1>
+
+                <p>Nền tảng giúp tra cứu, theo dõi và chấp hành tốt các quy định về giao thông.</p>
+
+            </div>
+
+        </div>
+
+
+
+        ---
+
+
+
+        <div class="section-container">
+
+            <h2 class="section-title">Tin tức Giao thông Nổi bật</h2>
+
+            <div class="news-container">
+
+                <a href="#" class="news-card">
+
+                    <img src="https://th.bing.com/th/id/OIP.Mx5FKvHOpS7Htg6fSz8kWAHaEK?w=324&h=182&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3" alt="Tin tức 1" class="news-image">
+
+                    <div class="news-content">
+
+                        <h4>Sơn Tây tăng cường tuần tra, xử lý vi phạm nồng độ cồn</h4>
+
+                        <p>Lực lượng chức năng đã lập biên bản hàng chục trường hợp vi phạm trong đợt ra quân mới nhất.</p>
+
+                    </div>
+
+                </a>
+
+                <a href="#" class="news-card">
+
+                    <img src="https://th.bing.com/th/id/OIP.OSZjGTrGPhaZnyA-ONJgEwHaD3?w=324&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3" alt="Tin tức 2" class="news-image">
+
+                    <div class="news-content">
+
+                        <h4>Khởi công dự án nâng cấp đường quốc lộ 32 đoạn qua thị xã Sơn Tây</h4>
+
+                        <p>Dự kiến công trình sẽ hoàn thành vào cuối năm 2026, giảm thiểu tình trạng ùn tắc giao thông.</p>
+
+                    </div>
+
+                </a>
+
+                <a href="#" class="news-card">
+
+                    <img src="https://th.bing.com/th/id/OIP.aAnkO9fEqOCw4ZV3_0HcVAHaEK?w=277&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3" alt="Tin tức 3" class="news-image">
+
+                    <div class="news-content">
+
+                        <h4>Đề xuất tuyến buýt nhanh mới nối trung tâm Hà Nội với Sơn Tây</h4>
+
+                        <p>Tuyến xe buýt mới hứa hẹn sẽ giải quyết vấn đề đi lại cho hàng nghìn người dân mỗi ngày.</p>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        ---
+
+
+
+        <div class="section-container">
+
+            <h2 class="section-title">Vì một Giao thông Văn minh</h2>
+
+            <div class="info-cards-container">
+
+                <div class="card blue">
+
+                    <h4>Tuân thủ Luật</h4>
+
+                    <p>Chấp hành nghiêm chỉnh các quy định về an toàn giao thông là chìa khóa để bảo vệ bản thân và những người xung quanh.</p>
+
+                </div>
+
+                <div class="card green">
+
+                    <h4>Ý thức Cộng đồng</h4>
+
+                    <p>Mỗi cá nhân có trách nhiệm góp phần tạo nên một môi trường giao thông văn minh, an toàn cho toàn xã hội.</p>
+
+                </div>
+
+                <div class="card yellow">
+
+                    <h4>Kiến thức và Kỹ năng</h4>
+
+                    <p>Trang bị đầy đủ kiến thức và kỹ năng cần thiết để xử lý các tình huống bất ngờ trên đường một cách an toàn.</p>
+
+                </div>
+
+                <div class="card red">
+
+                    <h4>Cẩn thận và Tập trung</h4>
+
+                    <p>Luôn giữ sự tập trung cao độ và cẩn thận khi tham gia giao thông, không sử dụng điện thoại và các thiết bị gây mất tập trung.</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+</body>
+
+</html>

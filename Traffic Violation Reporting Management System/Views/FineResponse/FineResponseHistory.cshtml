@@ -1,0 +1,52 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Helpers.PagedResult<Traffic_Violation_Reporting_Management_System.Models.FineResponse>
+@{
+    ViewBag.Title = "Lịch sử khiếu nại";
+    int stt = (Model.Page - 1) * Model.PageSize + 1;
+}
+
+<h2>Lịch sử Khiếu Nại</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>STT</th>
+            <th>Mã Phạt</th>
+            <th>Nội dung</th>
+            <th>Trạng thái</th>
+            <th>Thời gian tạo</th>
+            <th>Phản hồi</th>
+            <th>Ngày cập nhật</th>
+            <th>Xem chi tiết</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@stt</td>
+                <td>@item.FineId</td>
+                <td>@item.Content</td>
+                <td>@(item.Status == 0 ? "Đang chờ xử lý" : "Đã xử lý")</td>
+                <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@(item.Reply ?? "")</td>
+                <td>@(item.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "")</td>
+                <td>
+                    <a asp-action="Detail" asp-route-id="@item.ResponseId">Chi tiết</a>
+                </td>
+            </tr>
+            stt++;
+        }
+    </tbody>
+</table>
+
+<!-- Phân trang -->
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(Model.Page == i ? "active" : "")">
+                <a class="page-link" href="@Url.Action("FineResponseHistory", new { page = i })">@i</a>
+            </li>
+        }
+    </ul>
+</nav>

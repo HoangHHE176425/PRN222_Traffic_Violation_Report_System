@@ -1,0 +1,82 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Helpers.PagedResult<Traffic_Violation_Reporting_Management_System.Models.Report>
+
+@{
+    ViewData["Title"] = "Danh sách báo cáo";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- Form tìm kiếm -->
+<form asp-action="ReportList" method="get" class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <input type="text" name="search" value="@Context.Request.Query["search"]" placeholder="Tìm kiếm" class="form-control" style="width: 200px;" />
+
+    <select name="status" class="form-control" onchange="this.form.submit()" style="width: 150px;">
+        <option value="">--Trạng thái --</option>
+        <option value="0" selected="@(Context.Request.Query["status"] == "0")">Chưa xử lý</option>
+        <option value="1" selected="@(Context.Request.Query["status"] == "1")">Đã xử lý</option>
+    </select>
+
+    <select name="sortOrder" class="form-control" onchange="this.form.submit()" style="width: 200px;">
+        <option value="">-- Sắp xếp theo --</option>
+        <option value="violation_desc" selected="@(Context.Request.Query["sortOrder"] == "violation_desc")">Vi phạm gần nhất</option>
+        <option value="violation_asc" selected="@(Context.Request.Query["sortOrder"] == "violation_asc")">Vi phạm xa nhất</option>
+        <option value="created_desc" selected="@(Context.Request.Query["sortOrder"] == "created_desc")">Tạo gần nhất</option>
+        <option value="created_asc" selected="@(Context.Request.Query["sortOrder"] == "created_asc")">Tạo xa nhất</option>
+        <option value="name_asc" selected="@(Context.Request.Query["sortOrder"] == "name_asc")">Tên A → Z</option>
+        <option value="name_desc" selected="@(Context.Request.Query["sortOrder"] == "name_desc")">Tên Z → A</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+</form>
+
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>STT</th> <!-- Cột STT mới -->
+            <th>Người gửi</th>
+            <th>Địa điểm</th>
+            <th>Thời gian vi phạm</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th>Chi tiết</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Items.Count; i++)
+        {
+            var item = Model.Items[i];
+            <tr>
+                <td>@((Model.Page - 1) * Model.PageSize + i + 1)</td>
+                <td>@item.Reporter?.FullName</td>
+                <td>@item.Location</td>
+                <td>@(item.TimeOfViolation?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                <td>
+                    @(item.Status == 0 ? "Chưa xử lý" : "Đã xử lý")
+                </td>
+                <td>@(item.CreatedAt != null ? item.CreatedAt.ToString("dd/MM/yyyy HH:mm") : "N/A")</td> <!-- Fixed issue -->
+                <td>
+                    <a asp-action="Detail" asp-route-id="@item.ReportId" class="btn btn-sm btn-info">Chi tiết</a>
+                    <a asp-controller="Fine" asp-action="Create" asp-route-reportId="@item.ReportId" class="btn btn-sm btn-success ms-1">Tạo biên bản</a>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.Page ? "active" : "")">
+                <a class="page-link" href="@Url.Action("ReportList", new {
+                    page = i,
+                    pageSize = Model.PageSize,
+                    search = ViewBag.Search,
+                    status = ViewBag.Status,
+                    sortOrder = ViewBag.SortOrder
+                })">@i</a>
+            </li>
+        }
+    </ul>
+</nav>

@@ -1,0 +1,56 @@
+﻿@model Traffic_Violation_Reporting_Management_System.Helpers.PagedResult<Traffic_Violation_Reporting_Management_System.Models.Transaction>
+@{
+    ViewData["Title"] = "Lịch sử giao dịch";
+    int stt = (Model.Page - 1) * Model.PageSize + 1;
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (!Model.Items.Any())
+{
+    <p class="text-muted">Bạn chưa có giao dịch nào.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Mã GD</th>
+                <th>Số tiền</th>
+                <th>Ngày tạo</th>
+                <th>Mô tả</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@stt</td>
+                    <td>@item.TransactionId</td>
+                    <td>@item.Amount.ToString("N0", System.Globalization.CultureInfo.InvariantCulture) VNĐ</td>
+                    <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@item.Description</td>
+                    <td>
+                        <a asp-action="Detail" asp-route-id="@item.TransactionId" class="btn btn-sm btn-secondary">Xem</a>
+                    </td>
+                </tr>
+                stt++;
+            }
+        </tbody>
+    </table>
+
+    <!-- Phân trang -->
+  
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(Model.Page == i ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("TransactionHistory", new { page = i })">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+}

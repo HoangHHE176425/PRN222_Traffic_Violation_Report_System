@@ -1,0 +1,287 @@
+@model Traffic_Violation_Reporting_Management_System.DTOs.RegisterRequest
+
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+    Layout = null; 
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Hệ thống Quản lý Vi phạm Giao thông</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+<body class="auth-body">
+    <div class="login-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-7 col-md-9 col-sm-11">
+                    <div class="login-card">
+                        <div class="login-header">
+                            <i class="bi bi-person-plus" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <h2>Đăng ký tài khoản</h2>
+                            <p class="subtitle">Tham gia Hệ thống Quản lý Vi phạm Giao thông</p>
+                        </div>
+                        
+                        <div class="login-body">
+                            <form asp-controller="Auth" asp-action="Register" method="post" id="registerForm" novalidate>
+                                @Html.AntiForgeryToken()
+                                
+                                @if (!ViewData.ModelState.IsValid)
+                                {
+                                    <div class="alert alert-danger" role="alert">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        <div asp-validation-summary="All" class="mb-0"></div>
+                                    </div>
+                                }
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="FullName" 
+                                                   class="form-control" 
+                                                   id="fullNameInput" 
+                                                   type="text" 
+                                                   placeholder="Họ và tên"
+                                                   autocomplete="name"
+                                                   required />
+                                            <label for="fullNameInput">
+                                                <i class="bi bi-person me-2"></i>Họ và tên
+                                            </label>
+                                            <span asp-validation-for="FullName" class="text-validation"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="Cccd" 
+                                                   class="form-control" 
+                                                   id="cccdInput" 
+                                                   type="text" 
+                                                   placeholder="Số CCCD"
+                                                   autocomplete="off"
+                                                   maxlength="12"
+                                                   required />
+                                            <label for="cccdInput">
+                                                <i class="bi bi-card-text me-2"></i>Số CCCD
+                                            </label>
+                                            <span asp-validation-for="Cccd" class="text-validation"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="PhoneNumber" 
+                                                   class="form-control" 
+                                                   id="phoneInput" 
+                                                   type="tel" 
+                                                   placeholder="Số điện thoại"
+                                                   autocomplete="tel"
+                                                   maxlength="10"
+                                                   required />
+                                            <label for="phoneInput">
+                                                <i class="bi bi-telephone me-2"></i>Số điện thoại
+                                            </label>
+                                            <span asp-validation-for="PhoneNumber" class="text-validation"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="Email" 
+                                                   class="form-control" 
+                                                   id="emailInput" 
+                                                   type="email" 
+                                                   placeholder="name@example.com"
+                                                   autocomplete="email"
+                                                   required />
+                                            <label for="emailInput">
+                                                <i class="bi bi-envelope me-2"></i>Email
+                                            </label>
+                                            <span asp-validation-for="Email" class="text-validation"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-floating">
+                                    <input asp-for="Address" 
+                                           class="form-control" 
+                                           id="addressInput" 
+                                           type="text" 
+                                           placeholder="Địa chỉ"
+                                           autocomplete="street-address" />
+                                    <label for="addressInput">
+                                        <i class="bi bi-geo-alt me-2"></i>Địa chỉ (tùy chọn)
+                                    </label>
+                                    <span asp-validation-for="Address" class="text-validation"></span>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="Password" 
+                                                   class="form-control" 
+                                                   id="passwordInput" 
+                                                   type="password" 
+                                                   placeholder="Mật khẩu"
+                                                   autocomplete="new-password"
+                                                   required />
+                                            <label for="passwordInput">
+                                                <i class="bi bi-lock me-2"></i>Mật khẩu
+                                            </label>
+                                            <span asp-validation-for="Password" class="text-validation"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="ConfirmPassword" 
+                                                   class="form-control" 
+                                                   id="confirmPasswordInput" 
+                                                   type="password" 
+                                                   placeholder="Xác nhận mật khẩu"
+                                                   autocomplete="new-password"
+                                                   required />
+                                            <label for="confirmPasswordInput">
+                                                <i class="bi bi-lock-fill me-2"></i>Xác nhận mật khẩu
+                                            </label>
+                                            <span asp-validation-for="ConfirmPassword" class="text-validation"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+
+                                
+                                <button type="submit" class="btn btn-primary btn-login" id="registerBtn">
+                                    <span class="login-text">
+                                        <i class="bi bi-person-plus me-2"></i>Đăng ký tài khoản
+                                    </span>
+                                    <span class="loading-spinner">
+                                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                        Đang xử lý...
+                                    </span>
+                                </button>
+                            </form>
+                            
+                            <div class="footer-text">
+                                <p class="mb-0">
+                                    Đã có tài khoản? <a asp-controller="Auth" asp-action="Login">Đăng nhập ngay</a>
+                                </p>
+                                <p class="mb-0 mt-2">
+                                    <small>&copy; 2025 Hệ thống Quản lý Vi phạm Giao thông</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            console.log('🚀 Register page loaded successfully');
+            
+            
+            if (typeof $.fn.valid === 'function') {
+                console.log('✅ jQuery validation loaded');
+            } else {
+                console.error('❌ jQuery validation not loaded');
+            }
+            
+           
+            $('#registerForm').on('submit', function(e) {
+                console.log('📝 Form submission started');
+                
+                
+                const isValid = $(this).valid();
+                console.log('🔍 Form validation result:', isValid);
+                
+                if (!isValid) {
+                    console.log('❌ Form validation failed');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                const submitBtn = $('#registerBtn');
+                const loginText = submitBtn.find('.login-text');
+                const loadingSpinner = submitBtn.find('.loading-spinner');
+                
+                console.log('⏳ Showing loading state');
+                
+                
+                submitBtn.prop('disabled', true);
+                loginText.hide();
+                loadingSpinner.show();
+                
+                
+                setTimeout(function() {
+                    if ($('.text-danger:visible, .alert-danger:visible').length > 0) {
+                        console.log('🔄 Re-enabling button due to validation errors');
+                        submitBtn.prop('disabled', false);
+                        loginText.show();
+                        loadingSpinner.hide();
+                    }
+                }, 100);
+            });
+            
+           
+            $('#fullNameInput').focus();
+            
+            
+            $('#cccdInput, #phoneInput').on('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            
+           
+            $('#registerForm input').on('blur', function() {
+                const fieldName = $(this).attr('name');
+                const isValid = $(this).valid();
+                console.log(`🔍 Field "${fieldName}" validation:`, isValid);
+            });
+            
+        
+            $('#registerForm').on('invalid', function() {
+                console.log('❌ Form has validation errors');
+                const errors = $('#registerForm').validate().errorList;
+                console.log('Validation errors:', errors);
+            });
+            
+            
+            window.addEventListener('error', function(e) {
+                console.error('💥 JavaScript Error:', e.error);
+                console.error('📍 Error location:', e.filename + ':' + e.lineno);
+            });
+            
+            
+            $('#registerForm input').each(function() {
+                const name = $(this).attr('name');
+                const required = $(this).prop('required');
+                console.log(`📋 Field "${name}": required=${required}`);
+            });
+            
+            
+            $('#passwordInput').on('input', function() {
+                const password = $(this).val();
+                
+            });
+        });
+        
+
+    </script>
+</body>
+</html> 
